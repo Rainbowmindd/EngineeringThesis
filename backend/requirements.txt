@@ -1,0 +1,15 @@
+django>=5.0
+djangorestframework
+django-cors-headers
+django-environ
+djangorestframework-simplejwt
+psycopg2-binary
+requests
+msal
+google-api-python-client
+google-auth-oauthlib
+sendgrid
+twilio
+celery
+redis
+gunicorn
