@@ -118,3 +118,14 @@ JWT_AUTH_REFRESH_COOKIE = 'jwt-refresh-token'
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
 # ]
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
