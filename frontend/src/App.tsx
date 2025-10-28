@@ -1,14 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import TestConnection from "./pages/TestConnection";
+import { router } from './router/router'
+import { RouterProvider } from 'react-router-dom'
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/test-connection" element={<TestConnection />} />
-      </Routes>
-    </BrowserRouter>
-  );
+	return <RouterProvider router={router} />
 }
 
-export default App;
+export default App
