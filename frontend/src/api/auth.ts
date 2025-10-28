@@ -13,12 +13,16 @@ export interface LoginData {
 }
 
 export const register = async (data: RegisterData) => {
-  const response = await api.post("auth/registration/", data);
+  const response = await api.post("auth/registration/", data, {
+    withCredentials: true,
+  });
   return response.data;
 };
 
 export const login = async (data: LoginData) => {
-  const response = await api.post("auth/login", data);
+  const response = await api.post("auth/login/", data, {
+    withCredentials: true,
+  });
   return response.data;
 };
 
