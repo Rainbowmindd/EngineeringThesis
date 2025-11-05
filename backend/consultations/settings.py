@@ -98,12 +98,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ]
 }
 
 #for now for development purposes
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_CONFIRM_EMAIL_ON_GET=True
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
