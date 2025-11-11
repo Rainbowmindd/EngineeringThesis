@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.microsoft',
 
     #myapps
-    'consultations',
+    'config','apps.users'
 ]
 
 
@@ -49,7 +49,7 @@ MIDDLEWARE = [
 
 ]
 
-ROOT_URLCONF = 'consultations.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -138,3 +138,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+AUTH_USER_MODEL = 'users.User'
+
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'apps.users.serializers.RegisterSerializer',}
