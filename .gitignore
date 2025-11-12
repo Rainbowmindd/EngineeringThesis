@@ -1,0 +1,75 @@
+# Python
+*.py[cod]
+__pycache__/
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+pip-wheel-metadata/
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.mypy_cache/
+
+# Virtualenv / venv
+venv/
+.venv/
+ENV/
+env/
+.env
+.python-version
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+*/migrations/*.py[cod]
+!*/migrations/__init__.py
+
+# Node / frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+*.tsbuildinfo
+
+# Logs / temp
+*.log
+*.tmp
+tmp/
+*.swp
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# C / compiled artefacts
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.out
+*.elf
+
+# Coverage / reports
+coverage/
+htmlcov/
+
+# Other
+celerybeat-schedule
+instance/
+*.pem

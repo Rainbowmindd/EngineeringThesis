@@ -1,3 +1,5 @@
+import os
+import sys
 from pathlib import Path
 from datetime import timedelta
 
@@ -7,6 +9,8 @@ SECRET_KEY = 'django-insecure-dev-key-change-this'
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
+sys.path.insert(0, os.path.join(BASE_DIR,'apps'))
 
 INSTALLED_APPS = [
     # Django
@@ -33,7 +37,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.microsoft',
 
     #myapps
-    'config','apps.users'
+    'config','users','schedules','reservations',
 ]
 
 
