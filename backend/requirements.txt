@@ -2,7 +2,7 @@
 Django==4.2.26
 djangorestframework==3.16.1
 dj-rest-auth==7.0.1
-djangorestframework-simplejwt==6.2.1
+djangorestframework-simplejwt==5.5.1
 
 # Authentication / Social login
 django-allauth==65.13.0
