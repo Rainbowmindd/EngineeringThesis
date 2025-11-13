@@ -10,7 +10,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-sys.path.insert(0, os.path.join(BASE_DIR,'apps'))
+APPS_DIR = os.path.join(BASE_DIR, 'apps')
+if APPS_DIR not in sys.path:
+    sys.path.insert(0, APPS_DIR) # <-- MUSI BYĆ!
 
 INSTALLED_APPS = [
     # Django
@@ -37,7 +39,10 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.microsoft',
 
     #myapps
-    'config','users','schedules','reservations',
+    'config',
+    'users.apps.UsersConfig',           # Użyj tej konwencji, jeśli masz tak zdefiniowaną klasę
+    'schedules.apps.SchedulesConfig',
+    'reservations.apps.ReservationsConfig',
 ]
 
 

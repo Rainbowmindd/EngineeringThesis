@@ -3,12 +3,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Reservation
 from .serializers import ReservationSerializer
+from apps.users.permissions import IsLecturer, IsStudent
 
 class StudentReservationViewSet(viewsets.ModelViewSet):
     #Student moze tworzyc, przegladac, anulowac swoje rezerwacje
     #post, get , delete
     serializer_class = ReservationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsStudent]
 
     def get_queryset(self):
         #student widzi tylko swoje rezerwacje
@@ -37,7 +38,7 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
     #Prowadzacy moze przegladac rezerwacje swoich slotow i zmieniac ich status
 
     serializer_class = ReservationSerializer
-    permission_classes = [permissions.IsLecturer]
+    permission_classes = [IsLecturer]
 
     def get_queryset(self):
         #Prowadzacy widzi rezerwacje tylko swoich slotow
@@ -45,7 +46,7 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
 
     #Metoda do zmiany statusu rezerwacji (np zakonczona / nieobecnosc)
     @action(detail=True, methods=['post'])
-    def update(self, request, pk=None):
+    def update_status(self, request, pk=None):
         reservation = self.get_object()
         new_status=request.data.get('status') #oczekujemy na completed
 
