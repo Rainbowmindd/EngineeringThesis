@@ -7,7 +7,7 @@ router_student = DefaultRouter()
 router_student.register(r'student-reservations', StudentReservationViewSet, basename='student-reservations')
 
 router_lecturer = DefaultRouter()
-router_lecturer.register(r'lecturer-reservations', LecturerReservationViewSet, basename='lecturer-reservations')
+router_lecturer.register(r'lecturer-reservations', LecturerReservationViewSet, basename='slots')
 
 urlpatterns=[
     path('', include(router_student.urls)),

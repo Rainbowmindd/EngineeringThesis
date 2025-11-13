@@ -32,7 +32,7 @@ class AvailableSlot(models.Model):
     )
 
     #czy slot jest aktywny
-    is_activee=models.BooleanField(
+    is_active=models.BooleanField(
         default=True,
         verbose_name="Czy slot jest aktywny/moze byc rezerwowany"
     )
@@ -41,5 +41,12 @@ class AvailableSlot(models.Model):
         ordering = ['start_time']
         verbose_name = "Dostępny slot"
         verbose_name_plural = "Dostępne sloty"
+
+        # backend/apps/schedules/models.py (Poprawka)
+
     def __str__(self):
-        return f"Slot {self.lecturer.get_full_name()} od {self.start_time.strftime('%Y-%m-%d %H:%M')} do {self.end_time.strftime('%H:%M')} - {self.end_tim.strfgtime('%H:%M')}"
+        return (
+            f"Slot {self.lecturer.get_full_name()} "
+            f"od {self.start_time.strftime('%Y-%m-%d %H:%M')} "
+            f"do {self.end_time.strftime('%H:%M')}"
+            )
