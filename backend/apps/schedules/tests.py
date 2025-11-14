@@ -66,3 +66,32 @@ class AvailableSlotPermissionTest(APITestCase):
         #test czy slot zostal poprawnie utworzony (do wlasciwego wykladowcy)
         self.assertEqual(AvailableSlot.objects.get().lecturer, self.lecturer)
 
+    def test_student_can_list_public_slots(self):
+        print("Student moze przegladac publiczne sloty")
+        #Expected -> 200 OK dla studenta/anona przy przegladaniu publicznych slotow
+
+        #Tworzenie publicznego slotu przez prowadzacego
+        AvailableSlot.objects.create(
+            lecturer=self.lecturer,
+            start_time=timezone.now() + timedelta(days=1,hours=10),
+            end_time=timezone.now() + timedelta(days=1, hours=11),
+            max_attendees=1,
+            meeting_location='Test Pokoj',
+            is_active=True,
+        )
+
+        #klient bez uwierztelniania na potrzeby testu
+        anon_client=APIClient()
+
+        #Definicja url dla public endpoint
+        public_url = reverse('public-slots-list')
+
+        #get
+        response = anon_client.get(public_url)
+
+        #expected -> 200
+        self.assertEqual(response.status_code,200)
+
+        #weryfikacja czy jest widoczny slot
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['max_attendees'], 1)

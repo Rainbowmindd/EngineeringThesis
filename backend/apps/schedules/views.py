@@ -21,7 +21,7 @@ class LecturerSlotViewSet(viewsets.ModelViewSet):
 class PublicAvailableSlotViewSet(viewsets.ReadOnlyModelViewSet):
     #dostep do publicznych slotow dla studentow i nie zalogowanych uzytkownikow
     serializer_class = AvailableSlotSerializer
-    permission_classes = [IsStudent]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         #Student widzi aktywne sloty w przyszlosci
