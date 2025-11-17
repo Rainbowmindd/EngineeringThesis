@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import StudentReservationViewSet, LecturerReservationViewSet
+from ..schedules.views import PublicAvailableSlotViewSet
 
 router_student = DefaultRouter()
 #/api/reservations/student-reservations/
