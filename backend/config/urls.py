@@ -6,6 +6,7 @@ urlpatterns = [
     path('api/users/', include('apps.users.urls')),
     path('api/reservations/', include('apps.reservations.urls')),
     path('api/schedules/', include('apps.schedules.urls')),
+    path('api/notifications/', include('apps.notifications.urls'))
 
 
 ]
