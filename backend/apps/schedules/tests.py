@@ -95,3 +95,38 @@ class AvailableSlotPermissionTest(APITestCase):
         #weryfikacja czy jest widoczny slot
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['max_attendees'], 1)
+
+    #Test crud
+    def test_lecturer_can_update_own_slot(self):
+        print("Test aktualizacji terminu przez prowadzacego")
+        #expected -> 200 OK dla prowadzacego przy aktualizacji wlasnego slotu
+
+        #Tworzenie slotu przez prowadzacego
+        slot=AvailableSlot.objects.create(
+            lecturer=self.lecturer,
+            start_time=timezone.now() + timedelta(days=1),
+            end_time=timezone.now() + timedelta(days=1, hours=1),
+            max_attendees=1,
+            meeting_location='Test Pokoj',
+            is_active=True,
+        )
+
+        #To update
+        update_data={
+            'meeting_location': 'Nowy Pokoj',
+            'max_attendees':2,
+        }
+
+        #PUT
+        test_url=reverse('slots-detail', kwargs={'pk':slot.pk})
+        response = self.client.patch(test_url, update_data, format='json')
+
+        #200 OK
+        self.assertEqual(response.status_code,200)
+
+        #Weryfikacja aktualizacji (refresh i check)
+        slot.refresh_from_db()
+        self.assertEqual(slot.meeting_location, 'Nowy Pokoj')
+        self.assertEqual(slot.max_attendees, 2)
+
+

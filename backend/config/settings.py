@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',           # Użyj tej konwencji, jeśli masz tak zdefiniowaną klasę
     'schedules.apps.SchedulesConfig',
     'reservations.apps.ReservationsConfig',
+    'notifications.apps.NotificationsConfig',
 ]
 
 
