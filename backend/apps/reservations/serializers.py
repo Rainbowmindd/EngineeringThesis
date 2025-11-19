@@ -12,6 +12,12 @@ class ReservationSerializer(serializers.ModelSerializer):
         fields = ('id','slot', 'student', 'topic', 'status', 'booked_at', 'slot_details')
         read_only_fields=('student', 'status', 'booked_at')
 
+    def create(self, validated_data):
+        validated_data['status']='Pending' #domyslny status nowej rezerwacji
+        reservation=Reservation.objects.create(**validated_data)
+        return reservation
+
+
     def get_slot_details(self, obj):
         return{
             'start_time': obj.slot.start_time,
@@ -20,14 +26,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     #glowna waldacja dla NOWEJ rezerwacji (POST)
     def validate(self,data):
-        slot_id=data.get('slot')
-        if not slot_id:
-            raise serializers.ValidationError({"slot": "Musisz wybrać dostępny slot"})
-
-        try:
-            slot=slot_id
-        except AvailableSlot.DoesNotExist:
-            raise serializers.ValidationError({"slot": "Wybrany slot nie istnieje"})
+        slot=data.get('slot')
 
         #sprawdz czy slot/termin jest w przyszlosci
         if slot.start_time<=timezone.now():

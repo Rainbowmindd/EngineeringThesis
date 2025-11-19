@@ -43,15 +43,15 @@ class ReservationCreationtest(APITestCase):
             meeting_location='B5 sala 701',
             is_active=True,
         )
-        #sprawdzenie poczatkowej liczby powiadomien
-        initial_count=Notification.objects.count()
+
+        initial_notification_count=Notification.objects.count()
 
         #tworzenie rezerwacji jako student
         self.client.force_authenticate(user=self.student)
 
         reservation_data ={
             'slot': slot.pk,
-            'status': 'Pending',
+            # 'status': 'Pending',
             'notes': 'Potrzebuje konsultacji',
         }
 
@@ -64,12 +64,25 @@ class ReservationCreationtest(APITestCase):
         self.assertEqual(response.status_code, 201)
 
         #czy powstalo powiadomienie
-        final_count = Notification.objects.count()
-        self.assertEqual(final_count, initial_count + 2)
+        final_notification_count = Notification.objects.count()
+        self.assertEqual(final_notification_count, initial_notification_count + 2,"Powinny powstać 2 nowe powiadomienia (dla prowadzącego i studenta).")
+        # Powiadomienie dla PROWADZĄCEGO (o nowej rezerwacji)
+        lecturer_notification = Notification.objects.filter(
+            recipient=self.lecturer,
+            notification_type='NEW_RESERVATION'
+        ).first()
 
-        #czy powiadomienie trafilo do prowadzacego
-        new_notification=Notification.objects.latest('id')
-        self.assertEqual(new_notification.recipient, self.lecturer)
-        self.assertIn(self.student.get_full_name(), new_notification.message)
+        self.assertIsNotNone(lecturer_notification, "Nie znaleziono powiadomienia NEW_RESERVATION dla prowadzącego.")
+        self.assertIn(self.student.get_full_name(), lecturer_notification.message)
+
+        # Powiadomienie dla STUDENTA (potwierdzenie rezerwacji)
+        student_notification = Notification.objects.filter(
+            recipient=self.student,
+            notification_type='RESERVATION_CONFIRMATION'
+        ).first()
+
+        self.assertIsNotNone(student_notification,
+                             "Nie znaleziono powiadomienia RESERVATION_CONFIRMATION dla studenta.")
+        self.assertIn(self.lecturer.get_full_name(), student_notification.message)
 
 

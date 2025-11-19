@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Reservation
 from .serializers import ReservationSerializer
 from apps.users.permissions import IsLecturer, IsStudent
+from django.core.exceptions import PermissionDenied
 
 class StudentReservationViewSet(viewsets.ModelViewSet):
     #Student moze tworzyc, przegladac, anulowac swoje rezerwacje
