@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,6 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'corsheaders',
+
+    #celery
+    'django_celery_beat',
+    'django_celery_results',
 
     # Third-party
     'rest_framework',
@@ -65,7 +70,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -161,3 +166,24 @@ AUTH_USER_MODEL = 'users.User'
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'apps.users.serializers.RegisterSerializer',}
+
+#save celery task results in Django's database
+CELERY_RESULT_BACKEND='redis://127.0.0.1:6379/0'
+
+#URL DLA backendu wynikow gdzie celery przechowuje wyniki zadan
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+#THIS configures Redis as the datastore between Django and Celery
+# CELERY_BROKER_URL=config('CELERY_BROKER_REDIS_URL',default='redis://localhost:6379')
+
+#Zawartosc ktora celery bedzie akceptowac
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER='json'
+CELERY_RESULT_SERIALIZER='json'
+CELERY_TIMEZONE = 'Europe/Warsaw'
+
+#UNBLOCK
+CELERY_TASK_ALWAYS_EAGER=False
+CELERY_TASK_EAGER_PROPAGATION=False
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+

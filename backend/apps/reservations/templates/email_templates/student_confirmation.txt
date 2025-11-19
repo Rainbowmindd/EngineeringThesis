@@ -1,0 +1,13 @@
+Witaj {{ student_name }},
+
+Potwierdzamy Twoją rezerwację spotkania z {{ lecturer_name }}.
+
+Szczegóły spotkania:
+Data i godzina: {{ start_time }} - {{ end_time }}
+Temat: {{ topic }}
+Status: {{ status }}
+
+Prosimy o punktualne przybycie.
+
+Pozdrawiamy,
+Zespół ds. Rezerwacji

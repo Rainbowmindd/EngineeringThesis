@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from apps.users.models import User
+from apps.reservations.models import Reservation
 
 class Notification(models.Model):
 
@@ -14,6 +15,14 @@ class Notification(models.Model):
     #tresc i typ powiadomienia
     message = models.TextField(verbose_name="Tresc powiadomienia")
 
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.SET_NULL,  # Powiadomienie może przetrwać usunięcie rezerwacji
+        null=True,
+        blank=True,
+        related_name='related_notifications',
+        verbose_name='Powiazana rezerwacja'
+    )
     TYPE_CHOICES= [
         ('RESERVATION_CONFIRMATION', 'Potwierdzenie rezerwacji'),
         ('RESERVATION_CANCELLATION', 'Anulowanie rezerwacji'),
