@@ -51,3 +51,5 @@ class Reservation(models.Model):
         verbose_name_plural='Rezerwacje'
     def __str__(self):
         return f"Rezerwacja dla {self.student.get_full_name()} u {self.slot.lecturer.get_full_name()}na slot {self.slot} - Status: {self.status}"
+
+

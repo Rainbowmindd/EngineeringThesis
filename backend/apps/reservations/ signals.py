@@ -1,9 +1,8 @@
 from django.db.models.signals import post_save
-from django.dispatch import receiver
-from .models import Reservation
 from apps.notifications.models import Notification
+from apps.reservations.models import Reservation
+from django.conf import settings
 
-@receiver(post_save, sender=Reservation)
 def create_reservation_notification_on_new_reservation(sender, instance, created, **kwargs):
     print("!!! SYGNAŁ WYWOŁANY !!!")
     #tworzenie powiadomienia dla prowadzacego przy nowej rezerwacji
@@ -29,3 +28,7 @@ def create_reservation_notification_on_new_reservation(sender, instance, created
             message=f"Twoja rezerwacja na termin {reservation.slot.start_time.strftime('%d.%m.%Y %H:%M')} do {lecturer.get_full_name()}została potwierdzona.",
             notification_type='RESERVATION_CONFIRMATION'
         )
+post_save.connect(
+    create_reservation_notification_on_new_reservation,
+    sender=Reservation  # <-- Podłącz do swojego modelu Reservation
+)
