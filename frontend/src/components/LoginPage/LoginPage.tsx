@@ -31,7 +31,7 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
       const data = await login({ username: emailLogin, password: password });
       console.log("Login successful:", data);
       localStorage.setItem("authToken", data.key);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError;
