@@ -1,4 +1,3 @@
-// components/ui/button-variants.ts
 
 import { cva } from "class-variance-authority";
 

@@ -2,12 +2,12 @@ import * as React from 'react';
 import { Calendar, Clock, Users, BookOpen } from 'lucide-react';
 
 // Import komponentów Layoutu
-import  Header  from '@/components/layout/Header';
-import  Footer  from '@/components/layout/Footer';
+import  Header  from '../layout/Header';
+import  Footer  from '../layout/Footer';
 
 // Import komponentów UI
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/Card';
 
 // --- Main App Component ---
