@@ -1,10 +1,12 @@
-import React from 'react';
 
-export function DashboardPage(){
+export function DashboardPage() {
     return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold text-green-600 mb-4">Witaj w Systemie!</h1>
-      <p className="text-lg text-gray-700">Pomyślnie się zalogowano.</p>
-      <p className="mt-4 text-sm text-gray-500">To jest Twoja strona główna.</p>
-    </div>);
+        <div className="p-8">
+            <h2 className="text-4xl font-bold text-gray-800 mb-6">Twój Panel Użytkownika (Dashboard)</h2>
+            <p className="text-lg text-green-600">Jesteś zalogowany!</p>
+            <div className="mt-6 p-4 bg-white shadow-lg rounded-lg">
+                <p>Tutaj znajdą się Twoje rezerwacje, dane profilowe i inne funkcje systemowe.</p>
+            </div>
+        </div>
+    );
 }
