@@ -5,6 +5,7 @@ import { Register } from '../pages/Register'
 import { Home } from '../pages/Home'
 import { ProtectedRoute, AuthRedirect } from '../components/ProtectedRoutes/ProtectedRoute'
 import {StudentDashboard} from "@/components/DashboardPage/StudentDashboardPage.tsx";
+import {LecturerDashboard} from "@/components/DashboardPage/LecturerDashboardPage.tsx";
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -32,6 +33,10 @@ export const router = createBrowserRouter([
             {
                 path: 'student-dashboard',
                  element: <StudentDashboard />
+            },
+            {
+                path: 'lecturer-dashboard',
+                element: <LecturerDashboard />
             }
         ]
     },
