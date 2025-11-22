@@ -66,7 +66,10 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
       const data = await register({ username, email, password1, password2 });
       console.log("Registration successful:", data);
       setMessage(
-        "Registration successful! Please check your email to verify your account."
+        "Registration successful! Redirecting to login page...");
+          setTimeout(() => {
+            navigate("/login");
+          },2000
       );
     } catch (err) {
       console.error(err);

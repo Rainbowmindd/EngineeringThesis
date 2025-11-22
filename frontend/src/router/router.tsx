@@ -1,18 +1,38 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Login } from '../pages/Login'
 import { Register } from '../pages/Register'
-import { DashboardPage } from '../components/DashboardPage/DashboardPage.tsx'
+import { Dashboard } from '../pages/Dashboard'
+import { Home } from '../pages/Home'
+import { ProtectedRoute, AuthRedirect } from '../components/ProtectedRoutes/ProtectedRoute'
 export const router = createBrowserRouter([
     {
-        path: 'dashboard',
-        element: <DashboardPage />
+        path: '/',
+        element: <Home />
     },
+    //przekierowanie dla niezalogowanych uzygtkownikow:
     {
-        path: '/login',
-        element: <Login />
+        element: <AuthRedirect/>,
+        children: [
+            {
+                path: '/login',
+                element: <Login/>
+            },
+            {
+                path: '/register',
+                element: <Register/>
+            }
+        ]
     },
+
+    //przekierowanie dla zalogowanych uzytkownikow (protected route)
     {
-        path: '/register',
-        element: <Register />
-    }
-])
+        element: <ProtectedRoute/>,
+        children : [
+            {
+                path: 'dashboard',
+                 element: <Dashboard />
+            }
+        ]
+    },
+
+]);
