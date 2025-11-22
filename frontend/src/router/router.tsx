@@ -1,9 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Login } from '../pages/Login'
 import { Register } from '../pages/Register'
-import { Dashboard } from '../pages/Dashboard'
+//import { Dashboard } from '../pages/Dashboard'
 import { Home } from '../pages/Home'
 import { ProtectedRoute, AuthRedirect } from '../components/ProtectedRoutes/ProtectedRoute'
+import {StudentDashboard} from "@/components/DashboardPage/StudentDashboardPage.tsx";
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -29,8 +30,8 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute/>,
         children : [
             {
-                path: 'dashboard',
-                 element: <Dashboard />
+                path: 'student-dashboard',
+                 element: <StudentDashboard />
             }
         ]
     },
