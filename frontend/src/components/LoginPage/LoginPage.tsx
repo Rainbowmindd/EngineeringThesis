@@ -21,6 +21,7 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
   // Login page state
   const [emailLogin, setEmailLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"student" | "lecturer">("student");
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmitLogin = async (event: React.FormEvent) => {
@@ -28,10 +29,18 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
     setError("");
 
     try {
-      const data = await login({ username: emailLogin, password: password });
+      const data = await login({username: emailLogin, password: password});
       console.log("Login successful:", data);
       localStorage.setItem("authToken", data.key);
-      navigate("/dashboard");
+
+      const role = data.role as "student" | "lecturer";
+      if (role === "lecturer") {
+        navigate("/lecturer-dashboard"); }
+      else if(role === "student") {
+        navigate("/student-dashboard")
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const axiosError = err as AxiosError;
@@ -63,7 +72,7 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const data = await register({ username, email, password1, password2 });
+      const data = await register({ username, email, password1, password2, role });
       console.log("Registration successful:", data);
       setMessage(
         "Registration successful! Redirecting to login page...");
@@ -203,6 +212,19 @@ return (
                 required
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-green-600 focus:border-green-600 transition duration-150 ease-in-out"
               />
+            </div>
+            {/* Pole wybór roli */}
+            <div className="relative">
+              <label className="text-gray-600 text-sm font-medium mb-1 block">Rola</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as "student" | "lecturer")}
+                className="w-full pl-2 pr-4 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="student">Student</option>
+                <option value="lecturer">Prowadzący</option>
+              </select>
+
             </div>
 
             {/* Przycisk Rejestracji */}

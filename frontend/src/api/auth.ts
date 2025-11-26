@@ -5,6 +5,7 @@ export interface RegisterData {
   email: string;
   password1: string;
   password2: string;
+  role: "student" | "lecturer";
 }
 
 export interface LoginData {

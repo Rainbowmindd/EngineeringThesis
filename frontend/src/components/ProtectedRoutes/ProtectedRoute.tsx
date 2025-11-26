@@ -18,12 +18,4 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return children ? <>{children}</> : <Outlet />;
 }
 
-export const AuthRedirect: React.FC<ProtectedRouteProps> = ({ children }) => {
-    const token = localStorage.getItem('authToken');
-
-    if (token) {
-        return <Navigate to="/dashboard" replace/>;
-    }
-    return children ? <>{children}</> : <Outlet/>;
-};
 

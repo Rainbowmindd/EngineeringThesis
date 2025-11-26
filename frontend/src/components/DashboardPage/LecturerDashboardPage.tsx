@@ -12,7 +12,6 @@ import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus, Trash2, Edit2 }
 import Header from "../layout/Header"
 import Footer from "../layout/Footer"
 
-// Komponent Dialog w Twojej konwencji
 function Dialog({ open, onOpenChange, children }: { open: boolean, onOpenChange: (val: boolean) => void, children: React.ReactNode }) {
   return <>{children}</>
 }
