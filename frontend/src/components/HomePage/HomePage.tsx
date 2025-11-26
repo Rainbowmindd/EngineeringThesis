@@ -1,11 +1,9 @@
 import * as React from 'react';
 import { Calendar, Clock, Users, BookOpen } from 'lucide-react';
 
-// Import komponentów Layoutu
-import  Header  from '../layout/Header';
-import  Footer  from '../layout/Footer';
 
-// Import komponentów UI
+import   HomeHeader   from '../layout/HomeHeader';
+import  Footer  from '../layout/Footer';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/Card';
@@ -24,7 +22,7 @@ const HomePage: React.FC = () => {
         }
       `}</style>
 
-      <Header /> {/* Zastąpiony pełny kod nagłówka */}
+      <HomeHeader /> {}
 
       {/* Hero Section */}
       <section className="py-20 px-4">

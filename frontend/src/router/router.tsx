@@ -3,7 +3,8 @@ import { Login } from '../pages/Login'
 import { Register } from '../pages/Register'
 //import { Dashboard } from '../pages/Dashboard'
 import { Home } from '../pages/Home'
-import { ProtectedRoute, AuthRedirect } from '../components/ProtectedRoutes/ProtectedRoute'
+import { ProtectedRoute } from '../components/ProtectedRoutes/ProtectedRoute'
+import { AuthRedirect } from '../components/ProtectedRoutes/AuthRedirect'
 import {StudentDashboard} from "@/components/DashboardPage/StudentDashboardPage.tsx";
 import {LecturerDashboard} from "@/components/DashboardPage/LecturerDashboardPage.tsx";
 export const router = createBrowserRouter([
