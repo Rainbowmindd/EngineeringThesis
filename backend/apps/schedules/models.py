@@ -50,3 +50,22 @@ class AvailableSlot(models.Model):
             f"od {self.start_time.strftime('%Y-%m-%d %H:%M')} "
             f"do {self.end_time.strftime('%H:%M')}"
             )
+
+class BlockedTime(models.Model):
+    lecturer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='blocked_times'
+    )
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    reason = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        ordering = ['start_time']
+        verbose_name = "Zablokowany czas"
+        verbose_name_plural = "Zablokowane czasy"
+
+    def __str__(self):
+        return f"{self.lecturer.get_full_name()} blocked {self.start_time} - {self.end_time}"
+

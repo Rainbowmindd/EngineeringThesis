@@ -7,6 +7,7 @@ import { ProtectedRoute } from '../components/ProtectedRoutes/ProtectedRoute'
 import { AuthRedirect } from '../components/ProtectedRoutes/AuthRedirect'
 import {StudentDashboard} from "@/components/DashboardPage/StudentDashboardPage.tsx";
 import {LecturerDashboard} from "@/components/DashboardPage/LecturerDashboardPage.tsx";
+import { CalendarPage } from '@/components/Calendar/CalendarPage.tsx'
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -29,16 +30,27 @@ export const router = createBrowserRouter([
 
     //przekierowanie dla zalogowanych uzytkownikow (protected route)
     {
-        element: <ProtectedRoute/>,
+        element: <ProtectedRoute allowedRoles={["lecturer"]}/>,
+        children : [
+            {
+                path: 'lecturer-dashboard',
+                element: <LecturerDashboard />
+                // path: 'student-dashboard',
+                //  element: <StudentDashboard />
+            },
+            {
+                path: 'lecturer-calendar',
+                element: <CalendarPage />
+            }
+        ]
+    },
+    {
+        element: <ProtectedRoute allowedRoles={["student"]}/>,
         children : [
             {
                 path: 'student-dashboard',
                  element: <StudentDashboard />
             },
-            {
-                path: 'lecturer-dashboard',
-                element: <LecturerDashboard />
-            }
         ]
     },
 

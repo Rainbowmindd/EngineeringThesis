@@ -9,11 +9,12 @@ import { Input } from "../ui/Input"
 import { Label } from "../ui/Label"
 import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus, Trash2, Edit2 } from "lucide-react"
 
-import Header from "../layout/Header"
+import  LecturerHeader from "../layout/LecturerHeader.tsx"
 import Footer from "../layout/Footer"
 
 import { fetchUserProfile, type UserProfile } from "../../api/auth.ts";
 import  { useEffect } from "react";
+
 
 function Dialog({ open, onOpenChange, children }: { open: boolean, onOpenChange: (val: boolean) => void, children: React.ReactNode }) {
   return <>{children}</>
@@ -104,7 +105,7 @@ export function LecturerDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-green-50 to-white">
-      <Header />
+      <LecturerHeader />
       <main className="flex-grow container mx-auto px-4 py-8 max-w-6xl">
         {/* Welcome */}
         <div className="mb-8">
