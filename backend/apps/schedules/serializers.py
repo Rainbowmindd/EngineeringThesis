@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import models
-from .models import AvailableSlot
+from .models import AvailableSlot,  BlockedTime
 from apps.reservations.models import Reservation
 from apps.users.serializers import UserSerializer
 
@@ -20,3 +20,34 @@ class AvailableSlotSerializer(serializers.ModelSerializer):
             'is_active',
         )
         read_only_fields=('lecturer','lecturer_details')
+
+class AvailableSlotCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=AvailableSlot
+        fields=(
+            'id',
+            'start_time',
+            'end_time',
+            'meeting_location',
+            'max_attendees',
+            'is_active',
+        )
+class BlockedTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AvailableSlot
+        fields = (
+            'id',
+            'start_time',
+            'end_time',
+            'reason'
+        )
+
+class BlockedTimeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlockedTime
+        fields = (
+            'id',
+            'start_time',
+            'end_time',
+            'reason'
+        )

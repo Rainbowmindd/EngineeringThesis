@@ -46,3 +46,4 @@ class ReservationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Wybrany termin osiągną maksymalną liczbę rezerwacji.")
 
         return data
+
