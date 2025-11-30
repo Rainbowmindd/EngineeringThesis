@@ -103,10 +103,9 @@ export function LecturerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-green-50 to-white">
       <Header />
-
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="flex-grow container mx-auto px-4 py-8 max-w-6xl">
         {/* Welcome */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
