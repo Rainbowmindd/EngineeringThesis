@@ -18,11 +18,15 @@ interface LoginPageProps {
 export function LoginPage({ isRegisterPage }: LoginPageProps) {
   const navigate = useNavigate();
 
+
   // Login page state
   const [emailLogin, setEmailLogin] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "lecturer">("student");
   const [error, setError] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
 
   const handleSubmitLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -73,7 +77,7 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const data = await register({ username, email, password1, password2, role });
+      const data = await register({ username, email, password1, password2, role ,first_name:firstName, last_name: lastName});
       console.log("Registration successful:", data);
       setMessage(
         "Registration successful! Redirecting to login page...");
@@ -162,6 +166,32 @@ return (
         {/* --- Formularz Rejestracji --- */}
         {isRegisterPage && (
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Pole Imię (NOWE) */}
+            <div className="relative">
+              <User className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Imię" // lub First Name
+                value={firstName} // Użyj nowego stanu
+                onChange={(event) => setFirstName(event.target.value)}
+                required
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-green-600 focus:border-green-600 transition duration-150 ease-in-out"
+              />
+            </div>
+
+            {/* Pole Nazwisko (NOWE) */}
+            <div className="relative">
+              <User className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Nazwisko" // lub Last Name
+                value={lastName} // Użyj nowego stanu
+                onChange={(event) => setLastName(event.target.value)}
+                required
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-green-600 focus:border-green-600 transition duration-150 ease-in-out"
+              />
+            </div>
 
             {/* Pole Username */}
             <div className="relative">
