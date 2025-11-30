@@ -2,12 +2,35 @@ import * as React from "react"
 import { GraduationCap, User } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "../ui/Button"
+import { fetchUserProfile, type UserProfile } from "../../api/auth.ts";
+import { useEffect } from "react";
 
 const Header: React.FC = () => {
   const navigate = useNavigate()
 
+  const [userProfile, setUserProfile] = React.useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await fetchUserProfile()
+        setUserProfile(data)
+      } catch (error) {
+        console.error("Błąd ładowania profilu użytkownika w Headerze:", error)
+        if (error.response && error.response.status === 401) {
+             handleLogout();
+        }
+      }
+    }
+
+    // Sprawdź, czy mamy token, zanim spróbujemy pobrać profil
+    if (localStorage.getItem("authToken")) {
+        loadProfile();
+    }
+  }, [])
+
   const handleLogout = () => {
-    localStorage.removeItem("autghToken")
+    localStorage.removeItem("authToken")
     localStorage.removeItem("role");
 
     navigate("/login", {replace: true})
@@ -58,7 +81,11 @@ const Header: React.FC = () => {
         <div className="flex items-center space-x-3">
           <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600 p-2 rounded-full hover:bg-gray-50 transition-colors">
             <User className="h-5 w-5 text-green-500" />
-            <span className="font-semibold">Jan Kowalski</span>
+            <span className="font-semibold">
+              {userProfile
+                  ? `${userProfile.first_name} ${userProfile.last_name}`
+                  :"Ładowanie..."
+              }</span>
           </div>
 
           <Button
