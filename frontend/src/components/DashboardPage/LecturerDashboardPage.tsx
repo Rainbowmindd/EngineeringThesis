@@ -12,11 +12,28 @@ import { Calendar, Clock, Users, CheckCircle, AlertCircle, Plus, Trash2, Edit2 }
 import Header from "../layout/Header"
 import Footer from "../layout/Footer"
 
+import { fetchUserProfile, type UserProfile } from "../../api/auth.ts";
+import  { useEffect } from "react";
+
 function Dialog({ open, onOpenChange, children }: { open: boolean, onOpenChange: (val: boolean) => void, children: React.ReactNode }) {
   return <>{children}</>
 }
 
 export function LecturerDashboard() {
+
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const loadProfile=async () => {
+      try {
+        const data = await fetchUserProfile();
+        setUserProfile(data);
+      } catch (error) {
+        console.error("Błąd podczas pobierania profilu użytkownika:", error);
+      }
+    };
+    loadProfile();
+  }, []);
   const [slots, setSlots] = useState([
     { id: 1, subject: "Matematyka dyskretna", date: "2024-12-15", time: "14:00", duration: 30, capacity: 5, enrolled: 3, location: "Bud. A, pok. 215", status: "active" },
     { id: 2, subject: "Algorytmy i struktury danych", date: "2024-12-18", time: "10:30", duration: 45, capacity: 4, enrolled: 4, location: "Bud. C, pok. 102", status: "full" },
@@ -93,7 +110,9 @@ export function LecturerDashboard() {
         {/* Welcome */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Witaj, <span className="text-green-600">dr. Anna Nowak</span>!
+            Witaj, <span className="text-green-600}">
+              {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : "Lecturer"}
+            </span>!
           </h1>
           <p className="text-gray-600">Zarządzaj swoimi slotami rezerwacji i konsultacjami</p>
         </div>

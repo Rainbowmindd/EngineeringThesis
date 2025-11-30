@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Link } from "react-router-dom"
 
@@ -11,8 +9,26 @@ import { Calendar, Clock, Users, MapPin, ChevronRight, Check } from "lucide-reac
 import Header from "../layout/Header"
 import Footer from "../layout/Footer"
 
+import { fetchUserProfile, type UserProfile } from "../../api/auth";
+import { useEffect } from "react";
+
 export function StudentDashboard() {
   const [selectedDate, setSelectedDate] = useState<number>(15)
+
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  //pobieranie profilu
+  useEffect(() => {
+    const loadProfile = async () => {
+      try{
+        const data = await fetchUserProfile();
+        setUserProfile(data);
+      } catch (error) {
+        console.error("Błąd podczas pobierania profilu użytkownika:", error);
+      }
+    };
+    loadProfile();
+  }, []);
+
 
   // Sample data
   const upcomingConsultations = [
@@ -41,7 +57,9 @@ export function StudentDashboard() {
         {/* Welcome */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Witaj, <span className="text-green-600">Jan</span>!
+            Witaj, <span className="text-green-600}">
+              {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : "Student"}
+            </span>!
           </h1>
           <p className="text-gray-600">Zarządzaj swoimi konsultacjami i rezerwacjami w jednym miejscu</p>
         </div>
@@ -170,7 +188,7 @@ export function StudentDashboard() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-gray-900">Grudzień 2024</h3>
+                    <h3 className="font-semibold text-gray-900">Grudzień 2025</h3>
                     <div className="flex space-x-1">
                       <Button size="sm" variant="ghost">←</Button>
                       <Button size="sm" variant="ghost">→</Button>

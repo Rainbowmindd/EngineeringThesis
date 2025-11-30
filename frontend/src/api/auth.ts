@@ -15,6 +15,15 @@ export interface LoginData {
   password: string;
 }
 
+export interface UserProfile {
+    id: number;
+    username: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: "student" | "lecturer";
+}
+
 export const register = async (data: RegisterData) => {
   //mapowanie kluczy dla DRF
   const payload = {
