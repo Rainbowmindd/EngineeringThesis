@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios, {AxiosError} from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { login, register } from "../../api/auth";
+import { login, register, fetchUserProfile } from "../../api/auth";
 import {
   GraduationCap,
   Mail,
@@ -31,9 +31,10 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
     try {
       const data = await login({username: emailLogin, password: password});
       console.log("Login successful:", data);
-      localStorage.setItem("authToken", data.key);
+      localStorage.setItem("authToken", data.access);
 
-      const role = data.role as "student" | "lecturer";
+      const userProfile= await fetchUserProfile();
+      const role = userProfile.role as "student" | "lecturer";
       if (role === "lecturer") {
         navigate("/lecturer-dashboard"); }
       else if(role === "student") {

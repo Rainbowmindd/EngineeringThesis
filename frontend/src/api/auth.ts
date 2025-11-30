@@ -20,6 +20,7 @@ export const register = async (data: RegisterData) => {
     email: data.email,
     password: data.password1,
     password2: data.password2,
+    role: data.role,
   }
   const response = await api.post("api/users/register/", payload, {
     withCredentials: true,
@@ -36,5 +37,10 @@ export const login = async (data: LoginData) => {
 
 export const logoout = async () => {
   const response = await api.post("api/users/logout/");
+  return response.data;
+};
+
+export const fetchUserProfile = async () => {
+  const response = await api.get("api/users/me/");
   return response.data;
 };
