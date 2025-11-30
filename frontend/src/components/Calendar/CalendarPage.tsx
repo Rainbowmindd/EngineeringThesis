@@ -23,7 +23,8 @@ import { fetchUserProfile, type UserProfile } from "../../api/auth";
 // Importy API i typów
 import {
   schedulesAPI,
-  EXPORT_SCHEDULE_URL
+  EXPORT_SCHEDULE_URL,
+    exportScheduleCSV
 } from "../../api/schedule"
 import { type TimeWindow, type BlockedTime, type Reservation } from "../../api/types";
 
@@ -233,13 +234,30 @@ const handleAddTimeWindow = async () => {
     e.target.value = '';
   }
 
-  const handleExportCSV = () => {
-    const link = document.createElement("a");
-    link.href = EXPORT_SCHEDULE_URL;
-    link.setAttribute("download", `harmonogram-${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
+  const handleExportCSV = async () => { // Zmień na async
+    try {
+        // 1. Użyj Axiosa, aby uzyskać dane (blob) z tokenem
+        const csvBlob = await exportScheduleCSV();
+
+        // 2. Tworzenie obiektu URL i wymuszanie pobrania pliku
+        const url = window.URL.createObjectURL(new Blob([csvBlob]));
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.setAttribute('download', `harmonogram-${new Date().toISOString().split("T")[0]}.csv`);
+
+        document.body.appendChild(link);
+        link.click();
+
+        // 3. Czyszczenie
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+
+    } catch (error) {
+        console.error("Błąd eksportu:", error);
+        alert("Błąd: Nie udało się pobrać harmonogramu. Sprawdź, czy jesteś zalogowany.");
+    }
   };
 
   // --- RENDEROWANIE ---
