@@ -154,7 +154,7 @@ AUTHENTICATION_BACKENDS = (
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # adres Twojego Reacta w Vite
@@ -167,6 +167,9 @@ AUTH_USER_MODEL = 'users.User'
 
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'apps.users.serializers.RegisterSerializer',}
+
+FRONTEND_URL='http://localhost:5173'
+PASSWORD_RESET_CONFIRM_URL='f"{FRONTEND_URL}/reset-password/{{uid}}/{{token}}/"'
 
 #save celery task results in Django's database
 CELERY_RESULT_BACKEND='redis://127.0.0.1:6379/0'

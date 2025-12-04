@@ -160,6 +160,15 @@ return (
               <LogIn className="h-5 w-5" />
               <span>Zaloguj się</span>
             </button>
+            {/* Link do resetowania hasła */}
+<div className="mt-2 text-right">
+  <Link
+    to="/password-reset"
+    className="text-sm text-blue-600 hover:text-blue-700 font-medium transition duration-150"
+  >
+    Zapomniałeś hasła?
+  </Link>
+</div>
           </form>
         )}
 
@@ -172,8 +181,8 @@ return (
               <User className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Imię" // lub First Name
-                value={firstName} // Użyj nowego stanu
+                placeholder="Imię"
+                value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
                 required
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-green-600 focus:border-green-600 transition duration-150 ease-in-out"
