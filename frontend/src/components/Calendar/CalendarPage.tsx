@@ -278,9 +278,9 @@ const handleAddTimeWindow = async () => {
         {/* Welcome */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Zarządzaj harmonogramem, <span className="text-green-600}">
-              {userProfile ? `${userProfile.first_name}` : "Prowadzący"}
-            </span>!
+            Zarządzaj harmonogramem <span className="text-green-600}">
+              {userProfile ? `${userProfile.first_name}` : ""}
+            </span>
           </h1>
           <p className="text-gray-600">Ustaw stałą dostępność i okresy niedostępności.</p>
         </div>
@@ -333,7 +333,7 @@ const handleAddTimeWindow = async () => {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium mb-2">Całkowita pojemność (sloty)</p>
+                  <p className="text-gray-600 text-sm font-medium mb-2">Całkowity rozmiar</p>
                   <p className="text-3xl font-bold text-gray-900">{stats.totalCapacity}</p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
