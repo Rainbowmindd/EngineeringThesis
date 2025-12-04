@@ -25,7 +25,12 @@ export default function ForgotPasswordPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data?.email?.[0] || "Wystąpił błąd przy wysyłaniu maila")
+        if(data?.email?.[0]?.includes("Nie ma takiego użytkownika")) {
+          throw new Error("Użytkownik z podanym adresem email nie istnieje")
+        }else{
+          throw new Error(data?.email?.[0] || "Wystąpił błąd przy wysyłaniu maila")
+        }
+
       }
 
       setSubmitted(true)
