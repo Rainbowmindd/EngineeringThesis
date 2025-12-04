@@ -127,6 +127,7 @@ SIMPLE_JWT = {
 
 #for now for development purposes
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#POTEM zamienic na smtp zamiast console backend
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_CONFIRM_EMAIL_ON_GET=True
 
