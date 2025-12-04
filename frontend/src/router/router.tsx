@@ -8,6 +8,8 @@ import { AuthRedirect } from '../components/ProtectedRoutes/AuthRedirect'
 import {StudentDashboard} from "@/components/DashboardPage/StudentDashboardPage.tsx";
 import {LecturerDashboard} from "@/components/DashboardPage/LecturerDashboardPage.tsx";
 import { CalendarPage } from '@/components/Calendar/CalendarPage.tsx'
+import ForgotPasswordPage from "@/components/LoginPage/ForgotPasswordPage.tsx";
+
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -24,6 +26,10 @@ export const router = createBrowserRouter([
             {
                 path: '/register',
                 element: <Register/>
+            },
+            {
+                path:'/password-reset',
+                element: <ForgotPasswordPage />
             }
         ]
     },
