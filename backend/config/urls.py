@@ -2,6 +2,8 @@ from dj_rest_auth.views import PasswordResetConfirmView
 from django.contrib import admin
 from django.urls import path,include
 
+from apps.users.views import GoogleLogin
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('apps.users.urls')),
@@ -12,4 +14,5 @@ urlpatterns = [
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/auth/password/reset/confirm/<uid64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('api/auth/social/',include('apps.users.urls'))
 ]
