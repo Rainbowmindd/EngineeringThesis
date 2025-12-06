@@ -80,7 +80,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <Link href="#" className="hover:text-green-300 transition-colors">
-                  Moodle
+                  UPeL
                 </Link>
               </li>
             </ul>

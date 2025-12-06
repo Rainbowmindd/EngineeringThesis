@@ -1,7 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-// --- Główna Karta ---
 export type CardProps = React.HTMLAttributes<HTMLDivElement>
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -18,7 +17,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 )
 Card.displayName = "Card"
 
-// --- Header ---
 export type CardHeaderProps = React.HTMLAttributes<HTMLDivElement>
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
@@ -35,7 +33,6 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
 )
 CardHeader.displayName = "CardHeader"
 
-// --- Tytuł ---
 export type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement>
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, CardTitleProps>(
@@ -51,7 +48,6 @@ const CardTitle = React.forwardRef<HTMLParagraphElement, CardTitleProps>(
 )
 CardTitle.displayName = "CardTitle"
 
-// --- Opis ---
 export type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
 
 const CardDescription = React.forwardRef<
@@ -66,7 +62,6 @@ const CardDescription = React.forwardRef<
 ))
 CardDescription.displayName = "CardDescription"
 
-// --- Content ---
 export type CardContentProps = React.HTMLAttributes<HTMLDivElement>
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(

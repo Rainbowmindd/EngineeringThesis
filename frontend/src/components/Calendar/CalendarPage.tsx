@@ -12,15 +12,13 @@ import { Input } from "../ui/Input"
 import { Label } from "../ui/Label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/Select"
 
-// Importy ikon
 import { Calendar, Clock, Download, Upload, Plus, Trash2, Edit2, Lock, CheckCircle2, Users, AlertCircle } from "lucide-react"
 
-// Importy layoutu i profilu
+
 import LecturerHeader from "../layout/LecturerHeader"
 import Footer from "../layout/Footer"
 import { fetchUserProfile, type UserProfile } from "../../api/auth";
 
-// Importy API i typów
 import {
   schedulesAPI,
   EXPORT_SCHEDULE_URL,
@@ -42,7 +40,7 @@ export function CalendarPage() {
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Stany Dialogów, Formularzy i Edycji
+
   const [openTimeWindowDialog, setOpenTimeWindowDialog] = useState(false)
   const [openBlockedTimeDialog, setOpenBlockedTimeDialog] = useState(false)
   const [editingWindowId, setEditingWindowId] = useState<number | null>(null)
@@ -75,7 +73,6 @@ export function CalendarPage() {
       ]);
       setUserProfile(profileData);
 
-      // Axios zwraca obiekt odpowiedzi, interesują nas tylko dane (.data)
       setTimeWindows(Array.isArray(twResponse.data) ? twResponse.data : []);
       setBlockedTimes(Array.isArray(btResponse.data) ? btResponse.data : []);
       setReservations(Array.isArray(resResponse.data) ? resResponse.data : []);
@@ -94,7 +91,6 @@ export function CalendarPage() {
     loadData();
   }, [loadData]);
 
-  // --- STATYSTYKI ---
   const stats = {
     windows: timeWindows.length,
     blocked: blockedTimes.length,
@@ -102,7 +98,6 @@ export function CalendarPage() {
     totalCapacity: timeWindows.reduce((acc, tw) => acc + tw.capacity, 0),
   };
 
-  // --- HANDLERY (ASYNCHRONICZNE) ---
 
   const closeTimeWindowDialog = () => {
     setOpenTimeWindowDialog(false)
@@ -111,7 +106,6 @@ export function CalendarPage() {
   }
 
   const handleEditTimeWindow = (tw: TimeWindow) => {
-    // Mapowanie snake_case z API na formularz
     setTimeWindowForm({
       day: tw.day,
       start_time: tw.startTime,
@@ -123,7 +117,6 @@ export function CalendarPage() {
     setOpenTimeWindowDialog(true)
   }
 
-// CalendarPage.tsx - Poprawiony handleAddTimeWindow
 
 const handleAddTimeWindow = async () => {
   if (timeWindowForm.day && timeWindowForm.start_time && timeWindowForm.end_time) {
@@ -133,7 +126,7 @@ const handleAddTimeWindow = async () => {
         ...timeWindowForm, // day, start_time, end_time, capacity, location
         startTime: timeWindowForm.start_time,
         endTime: timeWindowForm.end_time,
-        is_recurring: true, // Dodajemy pole wymagane przez backend/model
+        is_recurring: true,
 
       };
 
@@ -153,7 +146,6 @@ const handleAddTimeWindow = async () => {
   const handleDeleteTimeWindow = async (id: number) => {
     if (window.confirm("Czy na pewno chcesz usunąć to okno dostępności?")) {
       try {
-        // UŻYWAMY schedulesAPI.deleteTimeWindow
         await schedulesAPI.deleteTimeWindow(id)
         loadData()
       } catch (error) {
@@ -169,7 +161,6 @@ const handleAddTimeWindow = async () => {
   }
 
   const handleEditBlockedTime = (bt: BlockedTime) => {
-    // Mapowanie snake_case z API na formularz
     setBlockedTimeForm({
       date: bt.date,
       start_time: bt.startTime,
@@ -222,7 +213,6 @@ const handleAddTimeWindow = async () => {
     formData.append('file', file);
 
     try {
-      // UŻYWAMY schedulesAPI.importSchedule
       await schedulesAPI.importSchedule(formData);
       alert("Pomyślnie zaimportowano plan zajęć! Dane są aktualizowane.");
       loadData();
@@ -237,10 +227,8 @@ const handleAddTimeWindow = async () => {
 
   const handleExportCSV = async () => { // Zmień na async
     try {
-        // 1. Użyj Axiosa, aby uzyskać dane (blob) z tokenem
         const csvBlob = await exportScheduleCSV();
 
-        // 2. Tworzenie obiektu URL i wymuszanie pobrania pliku
         const url = window.URL.createObjectURL(new Blob([csvBlob]));
         const link = document.createElement('a');
 
@@ -250,7 +238,6 @@ const handleAddTimeWindow = async () => {
         document.body.appendChild(link);
         link.click();
 
-        // 3. Czyszczenie
         window.URL.revokeObjectURL(url);
         document.body.removeChild(link);
 
@@ -260,7 +247,6 @@ const handleAddTimeWindow = async () => {
     }
   };
 
-  // --- RENDEROWANIE ---
 
   if (isLoading) {
       return (
@@ -285,7 +271,7 @@ const handleAddTimeWindow = async () => {
           <p className="text-gray-600">Ustaw stałą dostępność i okresy niedostępności.</p>
         </div>
 
-        {/* Stats Section (Konwencja Dashboardu) */}
+        {/* Stats Section */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-white">
             <CardContent className="p-6">
@@ -361,10 +347,10 @@ const handleAddTimeWindow = async () => {
           <input ref={fileInputRef} type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
         </div>
 
-        {/* Tabs Layout (Trzy Kolumny) */}
+        {/* Tabs Layout)*/}
         <div className="grid lg:grid-cols-3 gap-8">
 
-          {/* Kolumna 1: Okna Dostępności (Time Windows) */}
+          {/*Time Windows */}
           <div className="lg:col-span-1 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">Stałe Okna Dostępności</h2>
@@ -422,7 +408,7 @@ const handleAddTimeWindow = async () => {
             </div>
           </div>
 
-          {/* Kolumna 2: Zablokowane Okresy (Blocked Times) */}
+          {/*Blocked Times*/}
           <div className="lg:col-span-1 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">Zablokowane Okresy</h2>
@@ -479,7 +465,7 @@ const handleAddTimeWindow = async () => {
             </div>
           </div>
 
-          {/* Kolumna 3: Zarezerwowane Konsultacje (Reservations) */}
+          {/* Zarezerwowane Konsultacje*/}
           <div className="lg:col-span-1 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">Nadchodzące Rezerwacje</h2>

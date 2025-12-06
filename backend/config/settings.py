@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'corsheaders',
+    'axes',
 
     #celery
     'django_celery_beat',
@@ -62,8 +63,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'axes.middleware.AxesMiddleware',
 
 ]
+#Brute force protection settings
+AXES_FAILURE_LIMIT=3
+AXES_COOLOFF_TIME=0.1
+AXES_ONLY_USER_FAILURES=True
+AXES_LOCKOUT_TEMPLATE=None
 
 ROOT_URLCONF = 'config.urls'
 
@@ -170,6 +177,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 FRONTEND_URL='http://localhost:5173'
 PASSWORD_RESET_CONFIRM_URL='f"{FRONTEND_URL}/reset-password/{{uid}}/{{token}}/"'
+DEFAULT_FFROM_EMAIL="noreplu@agh.pl"
 
 #save celery task results in Django's database
 CELERY_RESULT_BACKEND='redis://127.0.0.1:6379/0'

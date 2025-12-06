@@ -13,7 +13,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/com
 const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white font-inter">
-      {/* Tailwind configuration script and font styles - Zostawione dla samodzielnej demonstracji */}
+      {/* Tailwind */}
       <script src="https://cdn.tailwindcss.com"></script>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');

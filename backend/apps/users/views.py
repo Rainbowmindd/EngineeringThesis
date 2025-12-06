@@ -1,6 +1,8 @@
+from allauth.socialaccount.providers.dummy.views import authenticate
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, UserSerializer
 
@@ -17,4 +19,36 @@ class ProfileView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+class LoginView(APIView):
+    permission_lasses=[permissions.AllowAny]
+
+    def post(self,request):
+        email=request.data.get('email')
+        password=request.data.get('password')
+
+        #czy email istnieje
+        if not User.objects.filter(email=email).exists():
+            return Response(
+                {"detail": "Invalid email or password."},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        user=authenticate(request,username=email,password=password)
+        if user is None:
+            return Response(
+                {"detail": "Invalid email or password."},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        from rest_framework_simplejwt.tokens import RefreshToken
+
+        refresh=RefreshToken.for_user(user)
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "role": user.role,
+            }
+        )
+
 
