@@ -10,6 +10,7 @@ import {LecturerDashboard} from "@/components/DashboardPage/LecturerDashboardPag
 import { CalendarPage } from '@/components/Calendar/CalendarPage.tsx'
 import ForgotPasswordPage from "@/components/LoginPage/ForgotPasswordPage.tsx";
 import ResetPasswordPage from '@/components/LoginPage/ResetPasswordConfirmPage.tsx';
+import OAuth2RedirectHandler from "@/components/OAuth2/OAuth2Page.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
             {
                 path:'/password-reset-confirm/:uid/:token',
                 element: <ResetPasswordPage />
+            },
+            {
+                path: '/oauth2/redirect',
+                element: <OAuth2RedirectHandler />
             }
         ]
     },

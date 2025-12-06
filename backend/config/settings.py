@@ -150,9 +150,10 @@ JWT_AUTH_REFRESH_COOKIE = 'jwt-refresh-token'
 
 # MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -199,3 +200,14 @@ CELERY_TASK_EAGER_PROPAGATION=False
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": config("GOOGLE_CLIENT_ID"),
+            "secret": config("GOOGLE_CLIENT_SECRET"),
+            "key": ""
+        },
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    }
+}

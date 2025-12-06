@@ -10,6 +10,7 @@ import {
   LogIn,
   UserPlus
 } from "lucide-react";
+import {GoogleLogin as GoogleOAuthLogin} from "@react-oauth/google";
 
 interface LoginPageProps {
   isRegisterPage: boolean;
@@ -187,6 +188,32 @@ return (
               <LogIn className="h-5 w-5" />
               <span>Zaloguj się</span>
             </button>
+
+    {/* --- Google OAuth --- */}
+    <div className="mt-2">
+      <GoogleOAuthLogin
+        onSuccess={async credentialResponse => {
+          const token = credentialResponse.credential;
+          try {
+            const { data } = await axios.post(
+              'http://localhost:8000/api/auth/social/google/',
+              { access_token: token }
+            );
+            localStorage.setItem('authToken', data.access);
+
+            const userProfile = await fetchUserProfile();
+            const role = userProfile.role as 'student' | 'lecturer';
+            if (role === 'lecturer') navigate('/lecturer-dashboard');
+            else if (role === 'student') navigate('/student-dashboard');
+            else navigate('/');
+          } catch (error) {
+            console.error(error);
+            setError('Nie udało się zalogować przez Google.');
+          }
+        }}
+        onError={() => setError('Nie udało się zalogować przez Google.')}
+      />
+    </div>
             {/* Link do resetowania hasła */}
 <div className="mt-2 text-right">
   <Link
