@@ -1,11 +1,10 @@
-// components/ui/Button.tsx
 
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { type VariantProps } from "class-variance-authority" // Importujemy tylko typy
+import { type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-// Nowy import:
+
 import { buttonVariants } from "./button-variants" 
 
 export interface ButtonProps
@@ -28,7 +27,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-// ZMIANA: Eksportujemy TYLKO komponent Button
 export { Button } 
-// Jeśli inne komponenty w projekcie potrzebują dostępu do 'buttonVariants', 
-// powinny importować je bezpośrednio z './button-variants'.

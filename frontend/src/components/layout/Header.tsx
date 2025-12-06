@@ -23,7 +23,6 @@ const Header: React.FC = () => {
       }
     }
 
-    // Sprawdź, czy mamy token, zanim spróbujemy pobrać profil
     if (localStorage.getItem("authToken")) {
         loadProfile();
     }

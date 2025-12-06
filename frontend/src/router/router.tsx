@@ -9,6 +9,7 @@ import {StudentDashboard} from "@/components/DashboardPage/StudentDashboardPage.
 import {LecturerDashboard} from "@/components/DashboardPage/LecturerDashboardPage.tsx";
 import { CalendarPage } from '@/components/Calendar/CalendarPage.tsx'
 import ForgotPasswordPage from "@/components/LoginPage/ForgotPasswordPage.tsx";
+import ResetPasswordPage from '@/components/LoginPage/ResetPasswordConfirmPage.tsx';
 
 export const router = createBrowserRouter([
     {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
             {
                 path:'/password-reset',
                 element: <ForgotPasswordPage />
+            },
+            {
+                path:'/password-reset-confirm/:uid/:token',
+                element: <ResetPasswordPage />
             }
         ]
     },

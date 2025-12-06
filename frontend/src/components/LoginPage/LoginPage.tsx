@@ -19,13 +19,13 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
   const navigate = useNavigate();
 
 
-  // Login page state
   const [emailLogin, setEmailLogin] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"student" | "lecturer">("student");
   const [error, setError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
 
 
   const handleSubmitLogin = async (event: React.FormEvent) => {
@@ -45,26 +45,34 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
         navigate("/student-dashboard")
       } else {
         navigate("/");
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const axiosError = err as AxiosError;
-        console.error("Blad rejestracji (Axios):",axiosError);
+      }} catch (err) {
+    if (axios.isAxiosError(err)) {
+      const axiosError = err as AxiosError;
 
-        if(axiosError.response && err.response && err.response.data){
-          console.log("Response data:", err.response.data);
-          const errorData = axiosError.response.data as Record<string, string[]>;
-                let errorMessage = "Rejestracja nieudana: ";
-                for (const key in errorData) {
-                    errorMessage += `${errorData[key].join(' ')} `;
-                }
-                setError(errorMessage.trim());
+      if (axiosError.response?.status === 401) {
+        setError("Nieprawidłowe dane logowania. Spróbuj ponownie.");
+        return;
+      }
+
+      if (axiosError.response?.data) {
+        const errorData = axiosError.response.data as any;
+
+        if (typeof errorData === "string") {
+          setError(errorData);
+          return;
+        }
+
+        if (typeof errorData === "object") {
+          const messages = Object.values(errorData).flat().join(" ");
+          setError("❌ " + messages);
+          return;
         }
       }
-
-      console.error(err.response.data);
-      setError("Login failed. Please check your credentials and try again.");
     }
+
+    setError(" Wystąpił błąd podczas logowania.");
+  }
+
   };
 
   // Registration page state
@@ -76,20 +84,40 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError("");
+    setMessage("");
+
     try {
       const data = await register({ username, email, password1, password2, role ,first_name:firstName, last_name: lastName});
-      console.log("Registration successful:", data);
+      console.log("Rejestracja udana:", data);
       setMessage(
-        "Registration successful! Redirecting to login page...");
+        "Rejestracja zakończona sukcesem! Za chwilę nastąpi przekierowanie do strony logowania.");
           setTimeout(() => {
             navigate("/login");
           },2000
       );
     } catch (err) {
       console.error(err);
-      setError(
-        "Registration failed. Please check your credentials and try again."
-      );
+      // Obsługa szczegółowych komunikatów przy rejestracji
+      if (axios.isAxiosError(err) && err.response?.data) {
+        const errorData = err.response.data as any;
+
+        if (typeof errorData === "string") {
+          setError(errorData);
+          return;
+        }
+
+           if (typeof errorData === "object") {
+        // Wyciągamy wszystkie komunikaty błędów i łączymy w jeden string
+        const messages = Object.values(errorData)
+          .flat()
+          .map((msg) => msg.toString())
+          .join(" \n ");
+        setError(messages);
+        return;
+      }
+    }
+    setError("Rejestracja nie powiodła się. Sprawdź podane dane i spróbuj ponownie.");
     }
   };
 
@@ -122,7 +150,6 @@ return (
           </p>
         )}
 
-        {/* --- Formularz Logowania --- */}
         {!isRegisterPage && (
           <form onSubmit={handleSubmitLogin} className="space-y-4">
 
@@ -278,7 +305,7 @@ return (
           </form>
         )}
 
-        {/* Stopka z przełącznikiem trybu (Card Footer) */}
+        {/* Stopka z przełącznikiem trybu Card Footer*/}
         <div className="mt-6 text-center text-sm border-t pt-4">
           {isRegisterPage ? (
             <p className="text-gray-600">

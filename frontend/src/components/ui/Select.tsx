@@ -1,4 +1,4 @@
-// ../ui/Select.tsx (Rozbudowany, ale prosty)
+
 
 import React, { createContext, useContext, useState } from "react"
 
@@ -18,7 +18,7 @@ const useSelectContext = () => {
   return context
 }
 
-// 2. Select (Główny komponent)
+
 interface SelectProps extends React.PropsWithChildren<{
   value: string
   onValueChange: (value: string) => void
@@ -28,22 +28,16 @@ interface SelectProps extends React.PropsWithChildren<{
 export const Select: React.FC<SelectProps> = ({ children, value, onValueChange, placeholder }) => {
   return (
     <SelectContext.Provider value={{ selectedValue: value, onValueChange, placeholder }}>
-      {/* Główny Select będzie działał jako wrapper,
-        natomiast faktyczny Select będzie renderowany w SelectTrigger,
-        ale zachowujemy strukturę dla zagnieżdżania.
-      */}
+      {}
       {children}
     </SelectContext.Provider>
   )
 }
 
-// 3. SelectTrigger (Wyświetla natywny select)
 interface SelectTriggerProps extends React.SelectHTMLAttributes<HTMLSelectElement> {}
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({ children, className = "", ...props }) => {
   const { selectedValue, onValueChange, placeholder } = useSelectContext()
-
-  // Filtrujemy, aby renderować tylko SelectContent i SelectItem
   const selectOptions = React.Children.toArray(children).find(
     (child: any) => child.type === SelectContent
   )
@@ -60,13 +54,12 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({ children, classNam
           {placeholder}
         </option>
       )}
-      {/* Renderowanie opcji z SelectContent */}
+      {}
       {selectOptions}
     </select>
   )
 }
 
-// 4. SelectValue (Wyświetla wartość - w tej prostej implementacji jest zbędny, ale musimy go zdefiniować)
 export const SelectValue: React.FC<React.PropsWithChildren<{ placeholder?: string }>> = ({ placeholder }) => {
   const { selectedValue } = useSelectContext()
   return (
@@ -77,13 +70,12 @@ export const SelectValue: React.FC<React.PropsWithChildren<{ placeholder?: strin
 }
 
 
-// 5. SelectContent (Kontener na opcje)
+
 export const SelectContent: React.FC<React.PropsWithChildren> = ({ children }) => {
-  // W uproszczonej wersji SelectContent renderuje po prostu listę <option>
   return <>{children}</>
 }
 
-// 6. SelectItem (Pojedyncza opcja)
+
 export const SelectItem: React.FC<{ value: string; children: React.ReactNode }> = ({ value, children }) => {
   return <option value={value}>{children}</option>
 }

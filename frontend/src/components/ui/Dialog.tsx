@@ -1,8 +1,6 @@
 
 import React, { useState, type ReactNode, type FC, createContext, useContext } from "react"
 
-// --- 1. DEFINICJA TYPÓW I KONTEKSTU ---
-
 interface DialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -12,7 +10,7 @@ interface DialogProps {
 interface DialogTriggerProps {
   children: ReactNode
   className?: string
-  asChild?: boolean // Dodajemy asChild dla elastyczności, jeśli będzie potrzebne
+  asChild?: boolean
   onClick?: () => void
 }
 
@@ -21,7 +19,6 @@ interface DialogContextType {
     setIsOpen: (value: boolean) => void;
 }
 
-// Kontekst do przekazywania stanu i funkcji otwierającej
 const DialogContext = createContext<DialogContextType | undefined>(undefined);
 
 const useDialogContext = () => {
@@ -32,7 +29,6 @@ const useDialogContext = () => {
     return context;
 };
 
-// --- 2. KOMPONENTY UI (Treść Modala) ---
 
 interface DialogContentProps {
   children: ReactNode
@@ -49,11 +45,7 @@ interface DialogTitleProps {
   className?: string
 }
 
-
-// --- 3. GŁÓWNY KOMPONENT DIALOG ---
-
 export const Dialog: FC<DialogProps> = ({ open: propOpen, onOpenChange, children }) => {
-  // Używamy stanu wewnętrznego, który może być kontrolowany przez prop 'open'
   const [isOpen, setIsOpen] = useState(propOpen ?? false);
 
   React.useEffect(() => {
@@ -80,8 +72,6 @@ export const Dialog: FC<DialogProps> = ({ open: propOpen, onOpenChange, children
   )
 }
 
-// --- 4. DIALOG TRIGGER (Przycisk otwierający) ---
-
 export const DialogTrigger: FC<DialogTriggerProps> = ({ children, onClick, className, asChild }) => {
   const { setIsOpen } = useDialogContext();
 
@@ -91,12 +81,10 @@ export const DialogTrigger: FC<DialogTriggerProps> = ({ children, onClick, class
     onClick?.();
   };
 
-  // Jeśli asChild jest true, używamy pierwszego dziecka jako przycisku
   if (asChild) {
-      // Zakładamy, że children jest jednym elementem React (np. Button)
       return React.cloneElement(children as React.ReactElement, {
           onClick: handleClick,
-          className: className, // Przekazywanie klasy do przycisku
+          className: className,
       });
   }
 
@@ -111,16 +99,12 @@ export const DialogTrigger: FC<DialogTriggerProps> = ({ children, onClick, class
   )
 }
 
-// --- 5. DIALOG CONTENT (Treść okna) ---
-
 export const DialogContent: FC<DialogContentProps> = ({ children, className }) => {
   const { isOpen, setIsOpen } = useDialogContext();
 
-  if (!isOpen) return null; // Warunkowe renderowanie
+  if (!isOpen) return null;
 
-  // Logika zamykania po kliknięciu poza oknem (backdrop)
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      // Sprawdź, czy kliknięcie nastąpiło bezpośrednio na tle, a nie wewnątrz modala
       if (e.target === e.currentTarget) {
           setIsOpen(false);
       }
@@ -142,8 +126,6 @@ export const DialogContent: FC<DialogContentProps> = ({ children, className }) =
     </div>
   )
 }
-
-// --- 6. POZOSTAŁE KOMPONENTY (Style Tailwind) ---
 
 export const DialogHeader: FC<DialogHeaderProps> = ({ children, className }) => {
   return <div className={`mb-4 ${className}`}>{children}</div>

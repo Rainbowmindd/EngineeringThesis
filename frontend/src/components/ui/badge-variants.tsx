@@ -11,9 +11,9 @@ export const badgeVariants = cva(
         secondary:
           "border-transparent bg-gray-100 text-gray-800 hover:bg-gray-100/80",
         outline: "text-gray-900",
-        // Wariant specjalny dla sekcji Hero
+
         primaryOutline: "bg-green-100 text-green-700 border border-green-200",
-        // Warianty statusu
+
         confirmed: "bg-green-100 text-green-800 border border-green-200 font-semibold",
         new: "bg-orange-100 text-orange-800 border border-orange-200 font-semibold",
         finished: "bg-blue-100 text-blue-800 border border-blue-200 font-semibold",

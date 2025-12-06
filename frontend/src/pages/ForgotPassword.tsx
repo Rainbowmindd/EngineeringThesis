@@ -1,4 +1,4 @@
-import ForgotPasswordPage from "../components/LoginPage/ForgotPassswordPage";
+import ForgotPasswordPage from "../components/LoginPage/ForgotPasswordPage";
 
 export function ForgotPassword() {
     return (

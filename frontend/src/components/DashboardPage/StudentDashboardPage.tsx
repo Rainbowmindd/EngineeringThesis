@@ -30,7 +30,7 @@ export function StudentDashboard() {
   }, []);
 
 
-  // Sample data
+  //Sample data
   const upcomingConsultations = [
     { id: 1, professor: "dr. Anna Nowak", subject: "Matematyka dyskretna", date: "2024-12-15", time: "14:00", status: "confirmed", location: "Bud. A, pok. 215" },
     { id: 2, professor: "Prof. Jan Kowalski", subject: "Algorytmy i struktury danych", date: "2024-12-18", time: "10:30", status: "pending", location: "Bud. C, pok. 102" },
