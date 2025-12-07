@@ -6,7 +6,6 @@ djangorestframework-simplejwt==5.5.1
 
 # Authentication / Social login
 django-allauth==65.13.0
-django-axes==6.5.0  # Dodane dla 'axes' w INSTALLED_APPS
 
 # CORS
 django-cors-headers==4.9.0
@@ -25,13 +24,6 @@ pycparser==2.23
 # ASGI / WSGI
 asgiref==3.10.0
 
-# Celery and related (poprawiona wersja django-celery-results na dostępną 2.6.0)
-Celery==5.4.0
-django-celery-beat==2.6.0
-django-celery-results==2.6.0  # Poprawione z 2.7.0 na 2.6.0
-kombu==5.4.0
-redis==5.2.0
-
 # Other dependencies
 certifi==2025.10.5
 charset-normalizer==3.4.4
@@ -39,4 +31,8 @@ idna==3.11
 sqlparse==0.5.3
 typing_extensions==4.15.0
 urllib3==2.5.0
-python-decouple==3.8
+Celery
+django-celery-beat
+django-celery-results
+python-decouple
+redis

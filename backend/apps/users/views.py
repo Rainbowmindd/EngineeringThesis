@@ -24,7 +24,7 @@ class ProfileView(generics.RetrieveAPIView):
         return self.request.user
 
 class LoginView(APIView):
-    permission_classes=[permissions.AllowAny]
+    permission_lasses=[permissions.AllowAny]
 
     def post(self,request):
         email=request.data.get('email')
