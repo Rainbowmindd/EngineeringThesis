@@ -4,10 +4,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files first to leverage Docker cache for dependencies
-COPY package*.json ./
+COPY package.json ./
 
-# Install dependencies
-RUN npm install
+# Remove package-lock.json if present and reinstall to fix optional deps issue
+RUN rm -f package-lock.json && npm install
 
 # Copy the rest of the application source code
 COPY . .

@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dev-key-change-this'
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '[::1']
 
 APPS_DIR = os.path.join(BASE_DIR, 'apps')
 if APPS_DIR not in sys.path:
