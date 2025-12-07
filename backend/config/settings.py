@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-dev-key-change-this'
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','0.0.0.0']
 
 APPS_DIR = os.path.join(BASE_DIR, 'apps')
 if APPS_DIR not in sys.path:
@@ -69,7 +69,7 @@ MIDDLEWARE = [
 #Brute force protection settings
 AXES_FAILURE_LIMIT=3
 AXES_COOLOFF_TIME=0.1
-AXES_ONLY_USER_FAILURES=True
+# AXES_ONLY_USER_FAILURES=True
 AXES_LOCKOUT_TEMPLATE=None
 
 ROOT_URLCONF = 'config.urls'
@@ -138,8 +138,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_CONFIRM_EMAIL_ON_GET=True
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_LOGIN_METHODS={'email'}
+# ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'jwt-auth'
@@ -150,11 +152,17 @@ JWT_AUTH_REFRESH_COOKIE = 'jwt-refresh-token'
 
 # MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",  # Dla dev servera Vite
+#     "http://127.0.0.1:5173",
+#     "http://localhost",  # DLA NGINX na porcie 80
+#     "http://127.0.0.1",
+# ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 AUTHENTICATION_BACKENDS = (
+    'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 )
