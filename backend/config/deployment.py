@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] #our own domain name
-CSRF_TRUSTED_ORIGINS = ['https://'+os.environ['WEBSITE_HOSTNAME']]
+CSRF_TRUSTED_ORIGINS = ['https://djangopracadyplomowa.azurewebsites.net']
 DEBUG=False
 
 MIDDLEWARE = [
