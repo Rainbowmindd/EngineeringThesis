@@ -1,7 +1,13 @@
 import os
 from .settings import *
+#
+# import dj_database_url
+# DATABASES = {
+#     'default': dj_database_url.config(default=os.environ.get('postgresql://postgres:kqkKqqdsGaucSvQDnTCBAwgISsapEuWV@postgres.railway.internal:5432/railway'))
+# }
 
-ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] #our own domain name
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] #our own domain name
 CSRF_TRUSTED_ORIGINS = ['https://'+os.environ['WEBSITE_HOSTNAME']]
 DEBUG=False
 
@@ -21,6 +27,7 @@ MIDDLEWARE = [
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_URL = '/static/'
 STATIC_ROOT=os.path.join(BASE_DIR,'staticfiles')
 
 #CONNECTION STRING ENV FROM AZURE FOR DATABASE
@@ -29,9 +36,11 @@ parameters = dict(pair.split('=') for pair in connection_string.split(';'))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': parameters['Database'],
-        'HOST': parameters['Host'],
-        'USER': parameters['User Id'],
-        'PASSWORD': parameters['Password'],
+        'NAME': os.environ.get['PGDATABASE'],
+        'USER': os.environ.get['PGUSER'],
+        'host': os.environ.get['PGHOST'],
+        'PASSWORD': os.environ.get['PGPASSWORD'],
+        'PORT': 5432,
     }
 }
+
