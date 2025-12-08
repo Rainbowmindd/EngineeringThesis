@@ -41,6 +41,14 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           WEBSITE_HOSTNAME: djangopracadyplomowa.azurewebsites.net
 
+      - name: List backend directory
+        run: |
+          cd backend
+          echo "=== Backend directory structure ==="
+          ls -al
+          echo "=== Static files ==="
+          ls -al staticfiles
+
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
@@ -61,6 +69,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
+
+      - name: List downloaded artifact
+        run: |
+          echo "=== Downloaded artifact contents ==="
+          ls -al python-app
 
       - name: Login to Azure
         uses: azure/login@v2
