@@ -28,16 +28,22 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Collect static files
+      - name: Run Django collectstatic / migrate
         run: |
           cd backend
           source antenv/bin/activate
           python manage.py collectstatic --noinput
-      - name: Apply Django migrations
-        run: |
-          cd backend
-          source antenv/bin/activate
-          python manage.py migrate --noinput
+          python manage.py migrate
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          # dodaj też zmienne bazy danych
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
