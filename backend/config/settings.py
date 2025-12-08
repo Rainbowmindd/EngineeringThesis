@@ -6,6 +6,9 @@ from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # <--- TO JEST KLUCZOWE
+
 SECRET_KEY = 'django-insecure-dev-key-change-this'
 DEBUG = False
 
