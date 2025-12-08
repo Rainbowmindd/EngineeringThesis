@@ -3,6 +3,10 @@ import sys
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+import dj_database_url
+DATABASES = {
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+}
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,7 +14,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # <--- TO JEST KLUCZOWE
 
 SECRET_KEY = 'django-insecure-dev-key-change-this'
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', '[::1']
 ALLOWED_HOSTS = ['*']
