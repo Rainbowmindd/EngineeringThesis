@@ -44,6 +44,7 @@ jobs:
           PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           PGDATABASE: ${{ secrets.PGDATABASE }}
+          WEBSITE_HOSTNAME: djangopracadyplomowa.azurewebsites.net
 
 
       - name: Upload artifact for deployment
