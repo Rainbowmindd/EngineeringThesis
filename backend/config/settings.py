@@ -120,7 +120,6 @@ TIME_ZONE = 'Europe/Warsaw'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SITE_ID = 1
@@ -160,6 +159,8 @@ JWT_AUTH_REFRESH_COOKIE = 'jwt-refresh-token'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+"http://localhost:5173",  # adres Twojego Reacta w Vite
+    "http://127.0.0.1:5173",
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -171,11 +172,11 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # adres Twojego Reacta w Vite
-    "http://127.0.0.1:5173",
-]
+#
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",  # adres Twojego Reacta w Vite
+#     "http://127.0.0.1:5173",
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -185,8 +186,9 @@ REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'apps.users.serializers.RegisterSerializer',}
 
 FRONTEND_URL='http://localhost:5173'
-PASSWORD_RESET_CONFIRM_URL='f"{FRONTEND_URL}/reset-password/{{uid}}/{{token}}/"'
-DEFAULT_FFROM_EMAIL="noreplu@agh.pl"
+PASSWORD_RESET_CONFIRM_URL = f"{FRONTEND_URL}/reset-password/{{uid}}/{{token}}/"
+
+DEFAULT_FROM_EMAIL="noreply@agh.pl"
 
 #save celery task results in Django's database
 CELERY_RESULT_BACKEND='redis://127.0.0.1:6379/0'
@@ -219,5 +221,5 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
-GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
-GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="")
+# GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
+# GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="")

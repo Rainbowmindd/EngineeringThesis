@@ -29,20 +29,20 @@ MIDDLEWARE = [
 
 ]
 
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_URL = '/static/'
 STATIC_ROOT=os.path.join(BASE_DIR,'staticfiles')
 
 #CONNECTION STRING ENV FROM AZURE FOR DATABASE
-connection_string=os.environ['AZURE_POSTGRESQL_CONNECTION_STRING']
-parameters = dict(pair.split('=') for pair in connection_string.split(';'))
+# connection_string=os.environ['AZURE_POSTGRESQL_CONNECTION_STRING']
+# parameters = dict(pair.split('=') for pair in connection_string.split(';'))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get['PGDATABASE'],
-        'USER': os.environ.get['PGUSER'],
-        'host': os.environ.get['PGHOST'],
-        'PASSWORD': os.environ.get['PGPASSWORD'],
+        'NAME': os.environ.get('PGDATABASE'),
+        'USER': os.environ.get('PGUSER'),
+        'HOST': os.environ.get('PGHOST'),
+        'PASSWORD': os.environ.get('PGPASSWORD'),
         'PORT': 5432,
     }
 }
