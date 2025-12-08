@@ -79,5 +79,5 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'djangopracadyplomowa'
-          package: backend/
+          package: python-app/
           #..

@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.microsoft',
 
     #myapps
-    'config',
     'users.apps.UsersConfig',           # Użyj tej konwencji, jeśli masz tak zdefiniowaną klasę
     'schedules.apps.SchedulesConfig',
     'reservations.apps.ReservationsConfig',
