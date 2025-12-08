@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -39,14 +39,7 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-#          # dodaj też zmienne bazy danych
-#          PGHOST: ${{ secrets.PGHOST }}
-#          PGPORT: ${{ secrets.PGPORT }}
-#          PGUSER: ${{ secrets.PGUSER }}
-#          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-#          PGDATABASE: ${{ secrets.PGDATABASE }}
           WEBSITE_HOSTNAME: djangopracadyplomowa.azurewebsites.net
-
 
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
@@ -60,8 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write # required for requesting the JWT
-      contents: read # required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
@@ -80,4 +73,3 @@ jobs:
         with:
           app-name: 'djangopracadyplomowa'
           package: python-app/
-          #..
