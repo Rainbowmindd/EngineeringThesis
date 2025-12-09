@@ -46,11 +46,11 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-
-    #social login
-    'allauth.socialaccount.providers.google',
-    'allauth.socialaccount.providers.microsoft',
+    # 'allauth.socialaccount',
+    #
+    # #social login
+    # 'allauth.socialaccount.providers.google',
+    # 'allauth.socialaccount.providers.microsoft',
 
     #myapps
     'users.apps.UsersConfig',           # Użyj tej konwencji, jeśli masz tak zdefiniowaną klasę
@@ -210,16 +210,16 @@ CELERY_TASK_EAGER_PROPAGATION=False
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "APP": {
-            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
-            "secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
-            "key": ""
-        },
-        "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"access_type": "online"},
-    }
-}
+# SOCIALACCOUNT_PROVIDERS = {
+#     "google": {
+#         "APP": {
+#             "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+#             "secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
+#             "key": ""
+#         },
+#         "SCOPE": ["profile", "email"],
+#         "AUTH_PARAMS": {"access_type": "online"},
+#     }
+# }
 # GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="dummy-client-id")
 # GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="dummy-client-secret")

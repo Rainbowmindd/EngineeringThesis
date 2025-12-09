@@ -11,5 +11,5 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/',ProfileView.as_view(), name='user_profile'),
     path('login/',TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('google/', GoogleLogin.as_view(), name='google_login')
+    # path('google/', GoogleLogin.as_view(), name='google_login')
 ]
