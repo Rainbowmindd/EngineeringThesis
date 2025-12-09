@@ -51,10 +51,10 @@ class LoginSerializer(serializers.Serializer):
         if email and password:
             try:
                 user = User.objects.get(email=email)
-                if user.check_password(password):
-                    data['user'] = user
-                else:
+                authenticated_user = authenticate(username=user.username, password=password)
+                if authenticated_user is None:
                     raise serializers.ValidationError("Nieprawidłowy email lub hasło")
+                data['user'] = authenticated_user
             except User.DoesNotExist:
                 raise serializers.ValidationError("Nieprawidłowy email lub hasło")
         else:
