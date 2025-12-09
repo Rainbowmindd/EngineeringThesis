@@ -3,7 +3,7 @@ import axios from "axios";
 // const API = import.meta.env.VITE_API_URL;
 const api = axios.create({
     // baseURL: "http://localhost:8000/", //for backend connection
-    baseURL: "djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net",
+    baseURL: "https://djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net",
     headers: { 
         "Content-Type": "application/json",
     },

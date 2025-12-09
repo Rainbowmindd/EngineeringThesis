@@ -13,7 +13,7 @@ ALLOWED_HOSTS = [os.environ.get('WEBSITE_HOSTNAME'),'*', 'djangopracadyplomowa-a
 # ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] #our own domain name
 CSRF_TRUSTED_ORIGINS = [
     "https://mango-bay-00e260d03.3.azurestaticapps.net",
-    "https://djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net/",
+    "https://djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net",
 ]
 
 DEBUG=False

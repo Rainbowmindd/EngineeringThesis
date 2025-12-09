@@ -41,9 +41,11 @@ export const register = async (data: RegisterData) => {
   return response.data;
 };
 
-export const login = async (data: LoginData) => {
-  const response = await api.post("/api/users/login/", data, {
-    withCredentials: true,
+export const login = async (email: string, password: string) => {
+  const response = await api.post("/api/auth/login/", {
+    // withCredentials: true,
+      email,
+      password
   });
   return response.data;
 };

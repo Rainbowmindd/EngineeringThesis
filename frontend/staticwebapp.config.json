@@ -3,7 +3,7 @@
     {
       "route": "/api/*",
       "allowedRoles": ["anonymous"],
-      "rewrite": "https://djangopracadyplomowa.azurewebsites.net/api/"
+      "rewrite": "https://djangopracadyplomowa.azurewebsites.net/api"
     }
   ]
 }
