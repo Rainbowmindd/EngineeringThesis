@@ -45,7 +45,7 @@ class LoginView(APIView):
             )
 
         # authenticate WYMAGA username, nie emaila
-        user = authenticate(request, email=user.email, password=password)
+        user = authenticate(request, username=user.username, password=password)
 
         if user is None:
             return Response(
