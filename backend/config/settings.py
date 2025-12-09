@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth',
     'allauth.account',
-    # 'allauth.socialaccount',
+    'allauth.socialaccount',
     #
     # #social login
     # 'allauth.socialaccount.providers.google',
