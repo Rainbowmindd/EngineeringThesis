@@ -220,5 +220,5 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
-# GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
-# GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="")
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="dummy-client-id")
+GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="dummy-client-secret")
