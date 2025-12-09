@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role')
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)  # tutaj możesz zmienić na email, jeśli chcesz logowanie po email
+    email = serializers.EmailField(required=True)  # zmienione z username na email
     password = serializers.CharField(write_only=True, required=True)
 
     def validate(self, data):
@@ -49,11 +49,15 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password')
 
         if email and password:
-            user = authenticate(email=email, password=password)
-            if not user:
+            try:
+                user = User.objects.get(email=email)
+                if user.check_password(password):
+                    data['user'] = user
+                else:
+                    raise serializers.ValidationError("Nieprawidłowy email lub hasło")
+            except User.DoesNotExist:
                 raise serializers.ValidationError("Nieprawidłowy email lub hasło")
         else:
             raise serializers.ValidationError("Musisz podać email i hasło")
 
-        data['user'] = user
         return data
