@@ -2,6 +2,7 @@
   "routes": [
     {
       "route": "/api/*",
+      "allowedRoles": ["anonymous"],
       "rewrite": "https://djangopracadyplomowa.azurewebsites.net/api/"
     }
   ]

@@ -9,11 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 # }
 
-ALLOWED_HOSTS = [os.environ.get('WEBSITE_HOSTNAME'),'*', 'djangopracadyplomowa.azurewebsites.net']
+ALLOWED_HOSTS = [os.environ.get('WEBSITE_HOSTNAME'),'*', 'djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net']
 # ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] #our own domain name
 CSRF_TRUSTED_ORIGINS = [
     "https://mango-bay-00e260d03.3.azurestaticapps.net",
-    "https://djangopracadyplomowa.azurewebsites.net",
+    "https://djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net/",
 ]
 
 DEBUG=False
@@ -61,6 +61,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY','super-secret-key')
 
 CORS_ALLOWED_ORIGINS = [
     "https://mango-bay-00e260d03.3.azurestaticapps.net",  # Twój frontend na SWA
-    "https://djangopracadyplomowa.azurewebsites.net",  # Backend też może być origin
+    "https://djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net/",  # Backend też może być origin
 ]
 CORS_ALLOW_CREDENTIALS = True
