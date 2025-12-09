@@ -39,10 +39,10 @@ export const register = async (data: RegisterData) => {
   return response.data;
 };
 
-export const login = async (data: LoginData) => {
-  const response = await api.post("/api/users/login/", data);
-  const accessToken = response.data.access;
-  if (accessToken) localStorage.setItem("authToken", accessToken);
+export const login = async (email:string, password:string) => {
+  const response = await api.post("/api/users/login/",{ email, password,});
+  // const accessToken = response.data.access;
+  // if (accessToken) localStorage.setItem("authToken", accessToken);
   return response.data;
 };
 
