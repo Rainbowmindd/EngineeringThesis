@@ -36,8 +36,8 @@ jobs:
           python manage.py migrate
         env:
           DJANGO_SETTINGS_MODULE: config.deployment
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+#          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+#          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
 #          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           WEBSITE_HOSTNAME: djangopracadyplomowa.azurewebsites.net
 
