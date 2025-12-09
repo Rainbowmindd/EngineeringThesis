@@ -1,10 +1,10 @@
-from allauth.socialaccount.providers.dummy.views import authenticate
+#from allauth.socialaccount.providers.dummy.views import authenticate
 # from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 # from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 # from dj_rest_auth.registration.views import SocialLoginView
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer, UserSerializer
