@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
 
@@ -40,3 +40,20 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role')
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)  # tutaj możesz zmienić na email, jeśli chcesz logowanie po email
+    password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+            if not user:
+                raise serializers.ValidationError("Nieprawidłowy login lub hasło")
+        else:
+            raise serializers.ValidationError("Musisz podać username i hasło")
+
+        data['user'] = user
+        return data
