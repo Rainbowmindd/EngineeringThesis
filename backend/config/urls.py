@@ -2,7 +2,7 @@ from dj_rest_auth.views import PasswordResetConfirmView
 from django.contrib import admin
 from django.urls import path,include
 
-from apps.users.views import GoogleLogin
+# from apps.users.views import GoogleLogin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
