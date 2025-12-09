@@ -11,7 +11,7 @@ export interface RegisterData {
 }
 
 export interface LoginData {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -35,33 +35,21 @@ export const register = async (data: RegisterData) => {
     password2: data.password2,
     role: data.role,
   }
-  const response = await api.post("/api/auth/registration/", payload, {
-    withCredentials: true,
-  });
+   const response = await api.post("/api/users/register/", payload);
   return response.data;
 };
 
-export const login = async (email: string, password: string) => {
-  const response = await api.post("/api/auth/login/", {
-    email,
-    password
-  });
-
-  // dj-rest-auth + JWT zwraca cookies, więc jeśli chcesz token w JS:
-  const accessToken = response.data.access_token || response.data.access;
-  if (accessToken) {
-    localStorage.setItem("authToken", accessToken);
-  }
-
+export const login = async (data: LoginData) => {
+  const response = await api.post("/api/users/login/", data);
+  const accessToken = response.data.access;
+  if (accessToken) localStorage.setItem("authToken", accessToken);
   return response.data;
 };
 
-
-export const logoout = async () => {
-  const response = await api.post("/api/auth/logout/");
+export const logout = () => {
   localStorage.removeItem("authToken");
-  return response.data;
 };
+
 
 
 export const fetchUserProfile = async () => {

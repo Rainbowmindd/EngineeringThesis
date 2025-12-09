@@ -23,36 +23,45 @@ class ProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
-# class LoginView(APIView):
-#     permission_classes=[permissions.AllowAny]
-#
-#     def post(self,request):
-#         email=request.data.get('email')
-#         password=request.data.get('password')
-#
-#         #czy email istnieje
-#         if not User.objects.filter(email=email).exists():
-#             return Response(
-#                 {"detail": "Invalid email or password."},
-#                 status=HTTP_400_BAD_REQUEST,
-#             )
-#         user=authenticate(request,username=email,password=password)
-#         if user is None:
-#             return Response(
-#                 {"detail": "Invalid email or password."},
-#                 status=HTTP_400_BAD_REQUEST,
-#             )
-#
-#         from rest_framework_simplejwt.tokens import RefreshToken
-#
-#         refresh=RefreshToken.for_user(user)
-#         return Response(
-#             {
-#                 "access": str(refresh.access_token),
-#                 "refresh": str(refresh),
-#                 "role": user.role,
-#             }
-#         )
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        if not email or not password:
+            return Response(
+                {"detail": "Email and password are required."},
+                status=HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"detail": "Invalid email or password."},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        # authenticate WYMAGA username, nie emaila
+        user = authenticate(request, username=user.username, password=password)
+
+        if user is None:
+            return Response(
+                {"detail": "Invalid email or password."},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": UserSerializer(user).data,
+        })
+
 # class GoogleLogin(SocialLoginView):
 #     adapter_class = GoogleOAuth2Adapter
 #     client_class = OAuth2Client
