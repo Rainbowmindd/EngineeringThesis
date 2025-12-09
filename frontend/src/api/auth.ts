@@ -35,46 +35,27 @@ export const register = async (data: RegisterData) => {
     password2: data.password2,
     role: data.role,
   }
-  // const response = await api.post("api/users/register/", payload, {
-  //   withCredentials: true,
-  // });
-  // return response.data;
-    //azure
-  const response = await api.post("/users/register/", payload, {
+  const response = await api.post("api/users/register/", payload, {
     withCredentials: true,
   });
   return response.data;
 };
 
-// export const login = async (data: LoginData) => {
-//   const response = await api.post("api/users/login/", data, {
-//     withCredentials: true,
-//   });
-//   return response.data;
-//azure
-  export const login = async (data: LoginData) => {
-  const response = await api.post("/users/login/", data, {
+export const login = async (data: LoginData) => {
+  const response = await api.post("api/users/login/", data, {
     withCredentials: true,
   });
   return response.data;
 };
 
-// export const logoout = async () => {
-//   const response = await api.post("api/users/logout/");
-//   return response.data;
-// };
-//azure
 export const logoout = async () => {
-  const response = await api.post("/users/logout/");
+  const response = await api.post("api/users/logout/");
   return response.data;
 };
 
-// export const fetchUserProfile = async () => {
-//   const response = await api.get("api/users/me/");
-//   return response.data;
-// };
-//azure
+
 export const fetchUserProfile = async () => {
-  const response = await api.get("/users/me/");
+  const response = await api.get("api/users/me/");
   return response.data;
 };
+
