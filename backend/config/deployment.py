@@ -4,12 +4,12 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import dj_database_url
-DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-}
+# import dj_database_url
+# DATABASES = {
+#     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+# }
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [os.environ.get('WEBSITE_HOSTNAME'),'*']
 # ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']] #our own domain name
 CSRF_TRUSTED_ORIGINS = ['https://djangopracadyplomowa.azurewebsites.net']
 DEBUG=False
@@ -47,3 +47,10 @@ STATIC_ROOT=os.path.join(BASE_DIR,'staticfiles')
 #     }
 # }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+SECRET_KEY = os.environ.get('SECRET_KEY','super-secret-key')
