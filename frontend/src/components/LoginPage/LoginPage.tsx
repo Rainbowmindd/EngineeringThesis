@@ -34,7 +34,7 @@ export function LoginPage({ isRegisterPage }: LoginPageProps) {
     setError("");
 
     try {
-      const data = await login({username: emailLogin, password: password});
+      const data = await login(emailLogin,password);
       console.log("Login successful:", data);
       localStorage.setItem("authToken", data.access);
 
