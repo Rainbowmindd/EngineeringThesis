@@ -4,9 +4,9 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config
 import dj_database_url
-DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
-}
+# DATABASES = {
+#     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+# }
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -212,13 +212,13 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
-            "client_id": config("GOOGLE_CLIENT_ID"),
-            "secret": config("GOOGLE_CLIENT_SECRET"),
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+            "secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
             "key": ""
         },
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
-GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="dummy-client-id")
-GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="dummy-client-secret")
+# GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="dummy-client-id")
+# GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="dummy-client-secret")
