@@ -160,6 +160,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 "http://localhost:5173",  # adres Twojego Reacta w Vite
     "http://127.0.0.1:5173",
+    "https://mango-bay-00e260d03.3.azurestaticapps.net",
 ]
 
 AUTHENTICATION_BACKENDS = (
