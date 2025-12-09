@@ -142,14 +142,14 @@ SIMPLE_JWT = {
 #for now for development purposes
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #POTEM zamienic na smtp zamiast console backend
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-ACCOUNT_CONFIRM_EMAIL_ON_GET=True
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
+# ACCOUNT_EMAIL_VERIFICATION = 'none'
+# ACCOUNT_CONFIRM_EMAIL_ON_GET=True
+# ACCOUNT_LOGIN_METHODS = {"username"}
+# ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = "username"
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = False
 
 # REST_USE_JWT = True
 # JWT_AUTH_COOKIE = 'jwt-auth'
