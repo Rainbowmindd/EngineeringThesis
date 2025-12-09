@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .views import RegisterView, ProfileView, GoogleLogin
+from .views import RegisterView, ProfileView
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
