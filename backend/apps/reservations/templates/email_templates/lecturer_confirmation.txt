@@ -1,0 +1,15 @@
+Witaj {{ lecturer_name }},
+
+Student {{ student_name }} zarezerwował(a) u Ciebie spotkanie w najbliższym terminie.
+
+Szczegóły rezerwacji:
+Data i godzina: {{ start_time }} - {{ end_time }}
+Temat: {{ topic }}
+Status: {{ status }}
+
+Prosimy o przygotowanie się do spotkania.
+
+W razie konieczności anulowania, prosimy o kontakt ze studentem.
+
+Pozdrawiamy,
+System Rezerwacji

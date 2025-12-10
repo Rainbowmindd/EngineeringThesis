@@ -1,0 +1,88 @@
+name: Build and deploy Python app to Azure Web App - djangopracadyplomowa
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create virtual environment and install dependencies
+        run: |
+          cd backend
+          python -m venv antenv
+          source antenv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Django collectstatic / migrate
+        run: |
+          cd backend
+          source antenv/bin/activate
+          python manage.py collectstatic --noinput
+          python manage.py migrate
+        env:
+          DJANGO_SETTINGS_MODULE: config.deployment
+#          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+#          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+#          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          WEBSITE_HOSTNAME: djangopracadyplomowa.azurewebsites.net
+
+      - name: List backend directory
+        run: |
+          cd backend
+          echo "=== Backend directory structure ==="
+          ls -al
+          echo "=== Static files ==="
+          ls -al staticfiles
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: |
+            backend/**
+            !backend/antenv/**
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+
+      - name: List downloaded artifact
+        run: |
+          echo "=== Downloaded artifact contents ==="
+          ls -al 
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
+        with:
+          app-name: 'djangopracadyplomowa'
+          package: ./
