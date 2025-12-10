@@ -1,11 +1,10 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 from .views import NotificationViewSet
 
-router_notifications = DefaultRouter()
+send_sms = NotificationViewSet.as_view({'post': 'send_sms'})
+send_email = NotificationViewSet.as_view({'post': 'send_email'})
 
-router_notifications.register(r'notifications',NotificationViewSet, basename='notifications')
-
-
-urlpatterns = router_notifications.urls
-
+urlpatterns = [
+    path('send_sms/', send_sms, name='send-sms'),
+    path('send_email/',send_email, name='send-email')
+]

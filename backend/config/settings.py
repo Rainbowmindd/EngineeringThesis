@@ -140,7 +140,7 @@ SIMPLE_JWT = {
 }
 
 #for now for development purposes
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #POTEM zamienic na smtp zamiast console backend
 # ACCOUNT_EMAIL_VERIFICATION = 'none'
 # ACCOUNT_CONFIRM_EMAIL_ON_GET=True
@@ -203,7 +203,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 FRONTEND_URL='http://localhost:5173'
 PASSWORD_RESET_CONFIRM_URL = f"{FRONTEND_URL}/reset-password/{{uid}}/{{token}}/"
 
-DEFAULT_FROM_EMAIL="noreply@agh.pl"
+
 
 #save celery task results in Django's database
 CELERY_RESULT_BACKEND='redis://127.0.0.1:6379/0'
@@ -224,6 +224,22 @@ CELERY_TASK_ALWAYS_EAGER=False
 CELERY_TASK_EAGER_PROPAGATION=False
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+#TWILIO - sms
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER')
+TWILIO_MESSAGING_SERVICE_SID = os.environ.get('TWILIO_MESSAGING_SERVICE_SID')
+
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+DEFAULT_FROM_EMAIL=os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST='smtp.sendgrid.net'
+EMAIL_HOST_PASSWORD=os.environ.get('SENDGRID_API_KEY')
+EMAIL_HOST_USER='apikey'
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+
 
 # SOCIALACCOUNT_PROVIDERS = {
 #     "google": {
