@@ -1,13 +1,16 @@
 import axios from "axios";
 
-// const API = import.meta.env.VITE_API_URL;
+// Wybierz URL na podstawie środowiska
+const API_URL = import.meta.env.DEV 
+  ? import.meta.env.VITE_API_URL_DEV 
+  : import.meta.env.VITE_API_URL_PROD;
+
 const api = axios.create({
-    // baseURL: "http://localhost:8000/", //for backend connection
-    baseURL: "https://djangopracadyplomowa-awa4hhecg8g5f0fq.westeurope-01.azurewebsites.net",
+    baseURL: API_URL,
     headers: { 
         "Content-Type": "application/json",
     },
-    // withCredentials: true,
+    withCredentials: true,
 });
 
 //interceptor
