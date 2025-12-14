@@ -37,6 +37,9 @@ class AvailableSlot(models.Model):
         verbose_name="Czy slot jest aktywny/moze byc rezerwowany"
     )
 
+    #kolumna przedmiot
+    subject = models.CharField(max_length=255, blank=True, null=True, verbose_name="Przedmiot")
+
     class Meta:
         ordering = ['start_time']
         verbose_name = "Dostępny slot"
@@ -47,6 +50,7 @@ class AvailableSlot(models.Model):
     def __str__(self):
         return (
             f"Slot {self.lecturer.get_full_name()} "
+            f"({self.subject})"
             f"od {self.start_time.strftime('%Y-%m-%d %H:%M')} "
             f"do {self.end_time.strftime('%H:%M')}"
             )
