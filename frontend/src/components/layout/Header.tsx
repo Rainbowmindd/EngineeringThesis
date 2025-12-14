@@ -48,7 +48,7 @@ const Header: React.FC = () => {
         {/* Nawigacja */}
         <nav className="hidden lg:flex items-center space-x-8">
           <Link 
-            to="/lecturers" 
+            to="/student-reservations"
             className="text-gray-600 hover:text-green-600 transition-colors font-medium"
           >
             Moi wykładowcy

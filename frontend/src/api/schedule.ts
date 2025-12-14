@@ -46,6 +46,11 @@ export const schedulesAPI = {
     getReservations: () =>
         api.get<Reservation[]>(`${BASE_URL}/calendar/reservations/`),
 
+
+    //public
+    getPublicSlots: () =>
+        api.get("/api/schedules/public-available-slots/"),
+
     //import
   importSchedule: (data: FormData) =>
     api.post(`${BASE_URL}/import/`, data, {

@@ -28,9 +28,12 @@ class ReservationSerializer(serializers.ModelSerializer):
     def validate(self,data):
         slot=data.get('slot')
 
-        #sprawdz czy slot/termin jest w przyszlosci
+        # sprawdz czy slot/termin jest w przyszlosci
         if slot.start_time<=timezone.now():
             raise serializers.ValidationError("Nie można rezerwować terminów z przeszłości")
+
+        # if slot.reservations.count() >= slot.capacity:
+        #     raise serializers.ValidationError("Brak wolnych miejsc na ten slot.")
 
         #sprawdz czy termin jest aktywny
         if not slot.is_active:

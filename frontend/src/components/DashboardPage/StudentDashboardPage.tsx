@@ -109,7 +109,7 @@ export function StudentDashboard() {
   const stats = {
     upcoming: upcomingConsultations.length,
     completed: myReservations.filter(r => r.status === "completed").length,
-    // TODO: policzy unikalnych wykładowców gdy backend będzie zwracał te dane
+
     lecturers: new Set(availableSlots.map(s => s.lecturer_details)).size,
   }
 
@@ -222,7 +222,7 @@ export function StudentDashboard() {
             <section>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Najbliższe konsultacje</h2>
-                <Link to="/student/reservations" className="text-green-600 hover:text-green-700 flex items-center space-x-1 text-sm font-medium">
+                <Link to="/student-reservations" className="text-green-600 hover:text-green-700 flex items-center space-x-1 text-sm font-medium">
                   <span>Zobacz wszystkie</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>

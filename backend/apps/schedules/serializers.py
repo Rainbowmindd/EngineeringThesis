@@ -22,8 +22,11 @@ class AvailableSlotSerializer(serializers.ModelSerializer):
             'subject',
         )
         read_only_fields=('lecturer','lecturer_details')
+
     def get_reservations_count(self, obj):
-        return obj.reservations.count()
+        return obj.reservations.exclude(
+            status__in=['Cancelled', 'No-Show Student', 'No-Show Lecturer']
+        ).count()
 
 class AvailableSlotCreateSerializer(serializers.ModelSerializer):
     class Meta:
