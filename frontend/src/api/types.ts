@@ -6,6 +6,7 @@ interface Consulation {
     time: string;
     status: 'confirmed' | 'pending' | 'cancelled';
     location: string;
+
 }
 
 // interface Reservation {
@@ -24,29 +25,38 @@ interface CalendarDay {
 
 
 export interface TimeWindow {
-  id: number
-  day: string
-  startTime: string
-  endTime: string
-  capacity: number
-    is_recurring: boolean
-    location: string
+  id: number;
+  start_time: string;
+  end_time: string;
+  meeting_location: string;
+  max_attendees: number;
+  is_active: boolean;
+  reservations_count?: number;
+  lecturer_details?: string;
+  subject?: string;
 }
 
 export interface BlockedTime {
   id: number
-  date: string
-  startTime: string
-  endTime: string
+  start_time: string
+  end_time: string
   reason: string
 }
 
 export interface Reservation {
   id: number
-  studentName: string
+  start_time: string
+  status: "Confirmed" | "Pending" | "Completed"
+  student_name?: string
+}
+
+// ui only
+export interface Consultaiton {
+    id: number
+  professor: string
   subject: string
   date: string
   time: string
-  status: "confirmed" | "pending" | "completed"
-    startTime: string
+  status: "confirmed" | "pending" | "cancelled"
+  location: string
 }

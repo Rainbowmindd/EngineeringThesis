@@ -11,6 +11,7 @@ import { CalendarPage } from '@/components/Calendar/CalendarPage.tsx'
 import ForgotPasswordPage from "@/components/LoginPage/ForgotPasswordPage.tsx";
 import ResetPasswordPage from '@/components/LoginPage/ResetPasswordConfirmPage.tsx';
 import OAuth2RedirectHandler from "@/components/OAuth2/OAuth2Page.tsx";
+import {ReservationsPage} from "@/components/ReservationsPage/ReservationsPage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -67,6 +68,11 @@ export const router = createBrowserRouter([
                 path: 'student-dashboard',
                  element: <StudentDashboard />
             },
+            {
+                path: 'student-reservations',
+                element: <ReservationsPage />
+            },
+
         ]
     },
 

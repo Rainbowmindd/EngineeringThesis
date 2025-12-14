@@ -29,6 +29,14 @@ class LecturerSlotViewSet(viewsets.ModelViewSet):
         #Podczas tworzenia nowego terminu, automatycznie przypisz prowadzacego
         serializer.save(lecturer=self.request.user)
 
+    #soft-delete
+    @action(detail=True, methods=['post'])
+    def deactivate(self,request,pk=None):
+        slot=self.get_object()
+        slot.is_active=False
+        slot.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class PublicAvailableSlotViewSet(viewsets.ReadOnlyModelViewSet):
     #dostep do publicznych slotow dla studentow i nie zalogowanych uzytkownikow
     serializer_class = AvailableSlotSerializer
