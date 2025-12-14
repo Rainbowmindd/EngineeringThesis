@@ -42,9 +42,9 @@ export const schedulesAPI = {
     createBlockedTime: (data: Omit<BlockedTime, "id">) =>
         api.post<BlockedTime>(`${BASE_URL}/calendar/blocked-times/`, data),
 
-    //rezerwacje konsultacji
-    getReservations: () =>
-        api.get<Reservation[]>(`${BASE_URL}/calendar/reservations/`),
+    // //rezerwacje konsultacji
+    // getReservations: () =>
+    //     api.get<Reservation[]>(`${BASE_URL}/my-reservations/`),
 
 
     //public

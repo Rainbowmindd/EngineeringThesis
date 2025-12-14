@@ -46,7 +46,7 @@ export interface BlockedTime {
 export interface Reservation {
   id: number
   start_time: string
-  status: "confirmed" | "pending" | "completed"
+  status: "Confirmed" | "Pending" | "Completed"
   student_name?: string
 }
 

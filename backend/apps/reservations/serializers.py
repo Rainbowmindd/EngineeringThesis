@@ -1,52 +1,83 @@
+
 from rest_framework import serializers
 from .models import Reservation
 from apps.schedules.models import AvailableSlot
 from django.utils import timezone
 
+
+class SlotDetailsSerializer(serializers.ModelSerializer):
+    lecturer_details = serializers.CharField(source='lecturer.get_full_name', read_only=True)
+    reservations_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AvailableSlot
+        fields = (
+            'id',
+            'start_time',
+            'end_time',
+            'lecturer_details',
+            'subject',
+            'meeting_location',
+            'max_attendees',
+            'reservations_count',
+            'is_active'
+        )
+        read_only_fields = ('lecturer_details',)
+
+    def get_reservations_count(self, obj):
+        return obj.reservations.exclude(
+            status__in=['Cancelled', 'No-Show Student', 'No-Show Lecturer']
+        ).count()
+
+
 class ReservationSerializer(serializers.ModelSerializer):
-    #informacje o slocie w odp GET
-    slot_details = serializers.SerializerMethodField()
+    slot = SlotDetailsSerializer(read_only=True)
+    slot_id = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Reservation
-        fields = ('id','slot', 'student', 'topic', 'status', 'booked_at', 'slot_details')
-        read_only_fields=('student', 'status', 'booked_at')
+        fields = ('id', 'slot', 'slot_id', 'student', 'topic', 'status', 'booked_at')
+        read_only_fields = ('student', 'status', 'booked_at')
 
     def create(self, validated_data):
-        validated_data['status']='Pending' #domyslny status nowej rezerwacji
-        reservation=Reservation.objects.create(**validated_data)
+        validated_data['status'] = 'Pending'
+        slot_id = validated_data.pop('slot_id', None)
+        if slot_id:
+            validated_data['slot_id'] = slot_id
+        reservation = Reservation.objects.create(**validated_data)
         return reservation
 
+    def validate_slot_id(self, value):
+        try:
+            AvailableSlot.objects.get(id=value)
+        except AvailableSlot.DoesNotExist:
+            raise serializers.ValidationError("Ten slot nie istnieje.")
+        return value
 
-    def get_slot_details(self, obj):
-        return{
-            'start_time': obj.slot.start_time,
-            'lecturer': obj.slot.lecturer.get_full_name()
-        }
+    def validate(self, data):
+        # Tylko waliduj gdy tworzymy rezerwację (POST)
+        if self.instance is None:
+            slot_id = self.initial_data.get('slot_id')
+            if not slot_id:
+                raise serializers.ValidationError("Slot jest wymagany.")
 
-    #glowna waldacja dla NOWEJ rezerwacji (POST)
-    def validate(self,data):
-        slot=data.get('slot')
+            try:
+                slot = AvailableSlot.objects.get(id=slot_id)
+            except AvailableSlot.DoesNotExist:
+                raise serializers.ValidationError("Ten slot nie istnieje.")
 
-        # sprawdz czy slot/termin jest w przyszlosci
-        if slot.start_time<=timezone.now():
-            raise serializers.ValidationError("Nie można rezerwować terminów z przeszłości")
+            if slot.start_time <= timezone.now():
+                raise serializers.ValidationError("Nie można rezerwować terminów z przeszłości")
 
-        # if slot.reservations.count() >= slot.capacity:
-        #     raise serializers.ValidationError("Brak wolnych miejsc na ten slot.")
+            if not slot.is_active:
+                raise serializers.ValidationError("Ten slot został tymczasowo wyłączony przez prowadzącego.")
 
-        #sprawdz czy termin jest aktywny
-        if not slot.is_active:
-            raise serializers.ValidationError("Ten slot został tymczasowo wyłączony przez prowadzącego.")
+            confirmed_reservations = Reservation.objects.filter(
+                slot=slot,
+                status='Confirmed'
+            ).count()
 
-        #sprawdz czy slot nie jest pelny
-        confirmed_reservations = Reservation.objects.filter(
-            slot=slot,
-            status='Confirmed'
-        ).count()
-
-        if confirmed_reservations >=slot.max_attendees:
-            raise serializers.ValidationError("Wybrany termin osiągną maksymalną liczbę rezerwacji.")
+            if confirmed_reservations >= slot.max_attendees:
+                raise serializers.ValidationError("Wybrany termin osiągnął maksymalną liczbę rezerwacji.")
 
         return data
-
