@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
+from apps.schedules.models import AvailableSlot
+from apps.reservations.models import Reservation
 
 User = get_user_model()
 
@@ -40,24 +42,54 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role')
-# class LoginSerializer(serializers.Serializer):
-#     email = serializers.EmailField(required=True)  # zmienione z username na email
-#     password = serializers.CharField(write_only=True, required=True)
-#
-#     def validate(self, data):
-#         email = data.get('email')
-#         password = data.get('password')
-#
-#         if email and password:
-#             try:
-#                 user = User.objects.get(email=email)
-#                 authenticated_user = authenticate(username=user.username, password=password)
-#                 if authenticated_user is None:
-#                     raise serializers.ValidationError("Nieprawidłowy email lub hasło")
-#                 data['user'] = authenticated_user
-#             except User.DoesNotExist:
-#                 raise serializers.ValidationError("Nieprawidłowy email lub hasło")
-#         else:
-#             raise serializers.ValidationError("Musisz podać email i hasło")
-#
-#         return data
+
+#admin section
+class AdminUserSerializer(serializers.ModelSerializer):
+    """Serializer dla użytkowników w panelu admina"""
+    full_name = serializers.SerializerMethodField()
+    consultations_count = serializers.SerializerMethodField()
+    reservations_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'full_name', 'role', 'is_active', 'date_joined',
+            'consultations_count', 'reservations_count'
+        ]
+        read_only_fields = ['id', 'date_joined']
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}" if obj.first_name else obj.username
+
+    def get_consultations_count(self, obj):
+        """Liczba konsultacji dla wykładowcy"""
+        if obj.role == 'lecturer':
+            return AvailableSlot.objects.filter(lecturer=obj).count()
+        return 0
+
+    def get_reservations_count(self, obj):
+        """Liczba rezerwacji dla studenta"""
+        if obj.role == 'student':
+            return Reservation.objects.filter(student=obj).count()
+        return 0
+
+
+class AdminReservationSerializer(serializers.ModelSerializer):
+    """Serializer dla rezerwacji w panelu admina"""
+    student_name = serializers.SerializerMethodField()
+    lecturer_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Reservation
+        fields = [
+            'id', 'student', 'student_name', 'time_window',
+            'lecturer_name', 'start_time', 'status', 'created_at'
+        ]
+
+    def get_student_name(self, obj):
+        return f"{obj.student.first_name} {obj.student.last_name}" if obj.student.first_name else obj.student.username
+
+    def get_lecturer_name(self, obj):
+        lecturer = obj.time_window.lecturer
+        return f"{lecturer.first_name} {lecturer.last_name}" if lecturer.first_name else lecturer.username

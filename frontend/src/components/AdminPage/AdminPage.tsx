@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
   Users,
@@ -19,77 +19,263 @@ import {
 import { Card, CardContent } from "../ui/Card"
 import { Button } from "../ui/Button"
 import { Badge } from "../ui/Badge"
+import { adminAPI, type AdminLecturer, type AdminStudent, type AdminReservation, type SystemLog } from "../../api/admin"
 
 type TabType = "overview" | "lecturers" | "students" | "reservations" | "logs"
-
-interface Lecturer {
-  id: string
-  name: string
-  department: string
-  consultations: number
-  status: "active" | "inactive"
-}
-
-interface Student {
-  id: string
-  name: string
-  email: string
-  reservations: number
-  status: "active" | "inactive"
-}
-
-interface Reservation {
-  id: string
-  student: string
-  lecturer: string
-  date: string
-  time: string
-  status: "confirmed" | "pending"
-}
-
-interface SystemLog {
-  id: string
-  action: string
-  user: string
-  timestamp: string
-  status: "success" | "warning"
-}
 
 export function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>("overview")
   const [searchQuery, setSearchQuery] = useState("")
+  const [loading, setLoading] = useState(true)
 
-  // Mock data
-  const stats = [
-    { label: "Aktywni Użytkownicy", value: "1,234", icon: Users, color: "green" },
-    { label: "Wykładowcy", value: "45", icon: BookOpen, color: "blue" },
-    { label: "Rezerwacje", value: "892", icon: Calendar, color: "purple" },
-    { label: "Średnia Ocena", value: "4.8/5", icon: BarChart3, color: "yellow" },
-  ]
+  // State for data
+  const [stats, setStats] = useState({
+    active_users: 0,
+    total_lecturers: 0,
+    total_reservations: 0,
+    average_rating: "0/5",
+  })
+  const [lecturers, setLecturers] = useState<AdminLecturer[]>([])
+  const [students, setStudents] = useState<AdminStudent[]>([])
+  const [reservations, setReservations] = useState<AdminReservation[]>([])
+  const [systemLogs, setSystemLogs] = useState<SystemLog[]>([])
+  const [systemHealth, setSystemHealth] = useState({
+    uptime: 99.9,
+    response_time: 142,
+    active_connections: 87,
+  })
 
-  const lecturers: Lecturer[] = [
-    { id: "1", name: "Prof. dr hab. Jan Kowalski", department: "Informatyka", consultations: 24, status: "active" },
-    { id: "2", name: "Prof. dr Magdalena Nowak", department: "Matematyka", consultations: 18, status: "active" },
-    { id: "3", name: "Dr inż. Piotr Lewandowski", department: "Elektronika", consultations: 12, status: "inactive" },
-  ]
+  useEffect(() => {
+    loadAllData()
+  }, [])
 
-  const students: Student[] = [
-    { id: "1", name: "Anna Michalik", email: "anna.michalik@student.agh.edu.pl", reservations: 3, status: "active" },
-    { id: "2", name: "Bartosz Szczepanik", email: "bartosz.szczepanik@student.agh.edu.pl", reservations: 5, status: "active" },
-    { id: "3", name: "Katarzyna Żuk", email: "katarzyna.zuk@student.agh.edu.pl", reservations: 2, status: "active" },
-  ]
+  const loadAllData = async () => {
+    setLoading(true)
+    try {
+      await Promise.all([
+        loadStats(),
+        loadLecturers(),
+        loadStudents(),
+        loadReservations(),
+        loadLogs(),
+        loadSystemHealth(),
+      ])
+    } catch (error) {
+      console.error("Błąd ładowania danych:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const reservations: Reservation[] = [
-    { id: "1", student: "Anna Michalik", lecturer: "Prof. dr hab. Jan Kowalski", date: "2024-12-15", time: "10:00", status: "confirmed" },
-    { id: "2", student: "Bartosz Szczepanik", lecturer: "Prof. dr Magdalena Nowak", date: "2024-12-16", time: "14:30", status: "pending" },
-    { id: "3", student: "Katarzyna Żuk", lecturer: "Prof. dr hab. Jan Kowalski", date: "2024-12-17", time: "15:00", status: "confirmed" },
-  ]
+  const loadStats = async () => {
+    try {
+      const response = await adminAPI.getStats()
+      setStats({
+        active_users: response.data.active_users,
+        total_lecturers: response.data.total_lecturers,
+        total_reservations: response.data.total_reservations,
+        average_rating: `${response.data.average_rating}/5`,
+      })
+    } catch (error) {
+      console.error("Błąd pobierania statystyk:", error)
+    }
+  }
 
-  const systemLogs: SystemLog[] = [
-    { id: "1", action: "Nowa rezerwacja", user: "Anna Michalik", timestamp: "10 minut temu", status: "success" },
-    { id: "2", action: "Edycja słotu", user: "Prof. Kowalski", timestamp: "25 minut temu", status: "success" },
-    { id: "3", action: "Anulowana rezerwacja", user: "Bartosz Szczepanik", timestamp: "1 godzina temu", status: "warning" },
-  ]
+  const loadLecturers = async () => {
+    try {
+      const response = await adminAPI.getLecturers()
+      setLecturers(response.data)
+    } catch (error) {
+      console.error("Błąd pobierania wykładowców:", error)
+    }
+  }
+
+  const loadStudents = async () => {
+    try {
+      const response = await adminAPI.getStudents()
+      setStudents(response.data)
+    } catch (error) {
+      console.error("Błąd pobierania studentów:", error)
+    }
+  }
+
+  const loadReservations = async () => {
+    try {
+      const response = await adminAPI.getReservations()
+      setReservations(response.data)
+    } catch (error) {
+      console.error("Błąd pobierania rezerwacji:", error)
+    }
+  }
+
+  const loadLogs = async () => {
+    try {
+      const response = await adminAPI.getLogs({ limit: 10 })
+      setSystemLogs(response.data)
+    } catch (error) {
+      console.error("Błąd pobierania logów:", error)
+    }
+  }
+
+  const loadSystemHealth = async () => {
+    try {
+      const response = await adminAPI.getSystemHealth()
+      setSystemHealth({
+        uptime: response.data.uptime,
+        response_time: response.data.response_time,
+        active_connections: response.data.active_connections,
+      })
+    } catch (error) {
+      console.error("Błąd pobierania health:", error)
+    }
+  }
+
+  const handleDeleteLecturer = async (id: number) => {
+    if (!confirm("Czy na pewno chcesz usunąć tego wykładowcę?")) return
+    try {
+      await adminAPI.deleteLecturer(id)
+      await loadLecturers()
+      alert("Wykładowca został usunięty")
+    } catch (error) {
+      console.error("Błąd usuwania wykładowcy:", error)
+      alert("Nie udało się usunąć wykładowcy")
+    }
+  }
+
+  const handleToggleLecturerStatus = async (id: number) => {
+    try {
+      await adminAPI.toggleLecturerStatus(id)
+      await loadLecturers()
+    } catch (error) {
+      console.error("Błąd zmiany statusu:", error)
+    }
+  }
+
+  const handleDeleteStudent = async (id: number) => {
+    if (!confirm("Czy na pewno chcesz usunąć tego studenta?")) return
+    try {
+      await adminAPI.deleteStudent(id)
+      await loadStudents()
+      alert("Student został usunięty")
+    } catch (error) {
+      console.error("Błąd usuwania studenta:", error)
+      alert("Nie udało się usunąć studenta")
+    }
+  }
+
+  const handleDeleteReservation = async (id: number) => {
+    if (!confirm("Czy na pewno chcesz usunąć tę rezerwację?")) return
+    try {
+      await adminAPI.deleteReservation(id)
+      await loadReservations()
+      alert("Rezerwacja została usunięta")
+    } catch (error) {
+      console.error("Błąd usuwania rezerwacji:", error)
+      alert("Nie udało się usunąć rezerwacji")
+    }
+  }
+
+  // =========================
+  // FILTERS & SEARCH
+  // =========================
+  const filteredLecturers = lecturers.filter(l => {
+    const fullName = `${l.first_name} ${l.last_name}`.toLowerCase()
+    const query = searchQuery.toLowerCase()
+    return fullName.includes(query) ||
+           l.email.toLowerCase().includes(query) ||
+           (l.department && l.department.toLowerCase().includes(query))
+  })
+
+  const filteredStudents = students.filter(s => {
+    const fullName = `${s.first_name} ${s.last_name}`.toLowerCase()
+    const query = searchQuery.toLowerCase()
+    return fullName.includes(query) || s.email.toLowerCase().includes(query)
+  })
+
+  // =========================
+  // FORMAT HELPERS
+  // =========================
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('pl-PL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  }
+
+  const formatTime = (dateStr: string) => {
+    return new Date(dateStr).toLocaleTimeString('pl-PL', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const formatTimestamp = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffMins < 1) return "Teraz"
+    if (diffMins < 60) return `${diffMins} minut temu`
+    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'godzinę' : 'godziny'} temu`
+    if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'dzień' : 'dni'} temu`
+    return formatDate(dateStr)
+  }
+  // Zwraca datę w formacie YYYY-MM-DD dla input type="date"
+const toISODate = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Zwraca czas w formacie HH:mm dla input type="time"
+const toISOTime = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
+// Zwraca datetime w formacie YYYY-MM-DDTHH:mm dla input type="datetime-local"
+const toISODatetimeLocal = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      'confirmed': 'Potwierdzona',
+      'pending': 'Oczekująca',
+      'completed': 'Zakończona',
+      'cancelled': 'Anulowana',
+      'success': 'Sukces',
+      'warning': 'Ostrzeżenie',
+      'error': 'Błąd'
+    }
+    return labels[status] || status
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Ładowanie panelu administratora...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -104,17 +290,17 @@ export function AdminPage() {
             <Badge className="bg-green-100 text-green-700 text-xs">Administracja</Badge>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/admin" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-              Panel
-            </Link>
-            <Link to="/lecturer-dashboard" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-              Wykładowcy
-            </Link>
-            <Link to="/student-dashboard" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
-              Student
-            </Link>
-          </nav>
+          {/*<nav className="hidden md:flex items-center space-x-6">*/}
+          {/*  <Link to="/admin-panel" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">*/}
+          {/*    Panel*/}
+          {/*  </Link>*/}
+          {/*  <Link to="/lecturer-dashboard" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">*/}
+          {/*    Wykładowcy*/}
+          {/*  </Link>*/}
+          {/*  <Link to="/student-dashboard" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">*/}
+          {/*    Student*/}
+          {/*  </Link>*/}
+          {/*</nav>*/}
 
           <div className="flex items-center space-x-3">
             <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-gray-600">
@@ -136,7 +322,12 @@ export function AdminPage() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((stat, index) => {
+          {[
+            { label: "Aktywni Użytkownicy", value: stats.active_users.toString(), icon: Users, color: "green" },
+            { label: "Wykładowcy", value: stats.total_lecturers.toString(), icon: BookOpen, color: "blue" },
+            { label: "Rezerwacje", value: stats.total_reservations.toString(), icon: Calendar, color: "purple" },
+            { label: "Średnia Ocena", value: stats.average_rating, icon: BarChart3, color: "yellow" },
+          ].map((stat, index) => {
             const Icon = stat.icon
             const colorClasses = {
               green: "bg-green-100 text-green-600",
@@ -170,7 +361,7 @@ export function AdminPage() {
               { id: "overview", label: "Przegląd" },
               { id: "lecturers", label: "Wykładowcy" },
               { id: "students", label: "Studenci" },
-              { id: "reservations", label: "Rezerwacje" },
+              // { id: "reservations", label: "Rezerwacje" },
               { id: "logs", label: "Dziennik" },
             ].map((tab) => (
               <button
@@ -199,20 +390,26 @@ export function AdminPage() {
                   <CardContent className="p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Ostatnia Aktywność</h2>
                     <div className="space-y-4">
-                      {systemLogs.map((log) => (
-                        <div key={log.id} className="flex items-start gap-3 pb-4 border-b border-gray-200 last:border-0">
-                          <div className={`p-2 rounded-lg mt-1 ${
-                            log.status === "success" ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"
-                          }`}>
-                            {log.status === "success" ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                      {systemLogs.length === 0 ? (
+                        <p className="text-gray-600 text-center py-4">Brak aktywności</p>
+                      ) : (
+                        systemLogs.map((log) => (
+                          <div key={log.id} className="flex items-start gap-3 pb-4 border-b border-gray-200 last:border-0">
+                            <div className={`p-2 rounded-lg mt-1 ${
+                              log.status === "success" ? "bg-green-100 text-green-600" : 
+                              log.status === "warning" ? "bg-yellow-100 text-yellow-600" :
+                              "bg-red-100 text-red-600"
+                            }`}>
+                              {log.status === "success" ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">{log.action}</p>
+                              <p className="text-xs text-gray-600">{log.user}</p>
+                            </div>
+                            <p className="text-xs text-gray-600 whitespace-nowrap">{formatTimestamp(log.timestamp)}</p>
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">{log.action}</p>
-                            <p className="text-xs text-gray-600">{log.user}</p>
-                          </div>
-                          <p className="text-xs text-gray-600 whitespace-nowrap">{log.timestamp}</p>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -228,16 +425,16 @@ export function AdminPage() {
                         <span className="text-sm text-gray-600">Dostępność</span>
                         <span className="inline-flex items-center gap-1 text-green-600 font-medium text-sm">
                           <Activity size={16} />
-                          99.9%
+                          {systemHealth.uptime}%
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">Średnia Odpowiedź</span>
-                        <span className="text-sm font-medium text-gray-900">142ms</span>
+                        <span className="text-sm font-medium text-gray-900">{systemHealth.response_time}ms</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">Użytkownicy Online</span>
-                        <span className="text-sm font-medium text-gray-900">87</span>
+                        <span className="text-sm font-medium text-gray-900">{systemHealth.active_connections}</span>
                       </div>
                       <div className="mt-4 pt-4 border-t border-gray-200">
                         <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
@@ -286,21 +483,30 @@ export function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {lecturers.map((lecturer) => (
+                      {filteredLecturers.map((lecturer) => (
                         <tr key={lecturer.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                          <td className="py-3 px-4 text-gray-900">{lecturer.name}</td>
-                          <td className="py-3 px-4 text-gray-600">{lecturer.department}</td>
-                          <td className="py-3 px-4 text-gray-900">{lecturer.consultations}</td>
+                          <td className="py-3 px-4 text-gray-900">
+                            {lecturer.first_name} {lecturer.last_name}
+                          </td>
+                          <td className="py-3 px-4 text-gray-600">{lecturer.department || "Brak"}</td>
+                          <td className="py-3 px-4 text-gray-900">{lecturer.consultations_count}</td>
                           <td className="py-3 px-4">
-                            <Badge className={lecturer.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}>
-                              {lecturer.status === "active" ? "Aktywny" : "Nieaktywny"}
+                            <Badge className={lecturer.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}>
+                              {lecturer.is_active ? "Aktywny" : "Nieaktywny"}
                             </Badge>
                           </td>
                           <td className="py-3 px-4 flex gap-2">
-                            <button className="p-2 hover:bg-gray-100 rounded transition-colors text-blue-600">
+                            <button
+                              onClick={() => handleToggleLecturerStatus(lecturer.id)}
+                              className="p-2 hover:bg-gray-100 rounded transition-colors text-blue-600"
+                              title="Zmień status"
+                            >
                               <Edit2 size={18} />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 rounded transition-colors text-red-600">
+                            <button
+                              onClick={() => handleDeleteLecturer(lecturer.id)}
+                              className="p-2 hover:bg-gray-100 rounded transition-colors text-red-600"
+                            >
                               <Trash2 size={18} />
                             </button>
                           </td>
@@ -348,19 +554,26 @@ export function AdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {students.map((student) => (
+                      {filteredStudents.map((student) => (
                         <tr key={student.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                          <td className="py-3 px-4 text-gray-900">{student.name}</td>
+                          <td className="py-3 px-4 text-gray-900">
+                            {student.first_name} {student.last_name}
+                          </td>
                           <td className="py-3 px-4 text-gray-600 text-xs">{student.email}</td>
-                          <td className="py-3 px-4 text-gray-900">{student.reservations}</td>
+                          <td className="py-3 px-4 text-gray-900">{student.reservations_count}</td>
                           <td className="py-3 px-4">
-                            <Badge className="bg-green-100 text-green-700">Aktywny</Badge>
+                            <Badge className={student.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}>
+                              {student.is_active ? "Aktywny" : "Nieaktywny"}
+                            </Badge>
                           </td>
                           <td className="py-3 px-4 flex gap-2">
                             <button className="p-2 hover:bg-gray-100 rounded transition-colors text-blue-600">
                               <Edit2 size={18} />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 rounded transition-colors text-red-600">
+                            <button
+                              onClick={() => handleDeleteStudent(student.id)}
+                              className="p-2 hover:bg-gray-100 rounded transition-colors text-red-600"
+                            >
                               <Trash2 size={18} />
                             </button>
                           </td>
@@ -373,55 +586,68 @@ export function AdminPage() {
             </Card>
           )}
 
-          {/* Reservations Tab */}
-          {activeTab === "reservations" && (
-            <Card className="border-0 shadow-sm">
-              <CardContent className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Wszystkie Rezerwacje</h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 font-semibold text-gray-900">Student</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-900">Wykładowca</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-900">Data</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-900">Godzina</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-900">Akcje</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reservations.map((reservation) => (
-                        <tr key={reservation.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                          <td className="py-3 px-4 text-gray-900">{reservation.student}</td>
-                          <td className="py-3 px-4 text-gray-600 text-sm">{reservation.lecturer}</td>
-                          <td className="py-3 px-4 text-gray-900">{reservation.date}</td>
-                          <td className="py-3 px-4 text-gray-900">{reservation.time}</td>
-                          <td className="py-3 px-4">
-                            <Badge className={
-                              reservation.status === "confirmed"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }>
-                              {reservation.status === "confirmed" ? "Potwierdzona" : "Oczekująca"}
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4 flex gap-2">
-                            <button className="p-2 hover:bg-gray-100 rounded transition-colors text-blue-600">
-                              <Edit2 size={18} />
-                            </button>
-                            <button className="p-2 hover:bg-gray-100 rounded transition-colors text-red-600">
-                              <Trash2 size={18} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/*/!* Reservations Tab *!/*/}
+          {/*{activeTab === "reservations" && (*/}
+          {/*  <Card className="border-0 shadow-sm">*/}
+          {/*    <CardContent className="p-6">*/}
+          {/*      <h2 className="text-lg font-semibold text-gray-900 mb-6">Wszystkie Rezerwacje</h2>*/}
+          {/*      <div className="overflow-x-auto">*/}
+          {/*        <table className="w-full text-sm">*/}
+          {/*          <thead>*/}
+          {/*            <tr className="border-b border-gray-200">*/}
+          {/*              <th className="text-left py-3 px-4 font-semibold text-gray-900">Student</th>*/}
+          {/*              <th className="text-left py-3 px-4 font-semibold text-gray-900">Wykładowca</th>*/}
+          {/*              <th className="text-left py-3 px-4 font-semibold text-gray-900">Data</th>*/}
+          {/*              <th className="text-left py-3 px-4 font-semibold text-gray-900">Godzina</th>*/}
+          {/*              <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>*/}
+          {/*              <th className="text-left py-3 px-4 font-semibold text-gray-900">Akcje</th>*/}
+          {/*            </tr>*/}
+          {/*          </thead>*/}
+          {/*          <tbody>*/}
+          {/*            {reservations.length === 0 ? (*/}
+          {/*              <tr>*/}
+          {/*                <td colSpan={6} className="py-8 text-center text-gray-600">*/}
+          {/*                  Brak rezerwacji w systemie*/}
+          {/*                </td>*/}
+          {/*              </tr>*/}
+          {/*            ) : (*/}
+          {/*              reservations.map((reservation) => (*/}
+          {/*                <tr key={reservation.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">*/}
+          {/*                  <td className="py-3 px-4 text-gray-900">{reservation.student_name}</td>*/}
+          {/*                  <td className="py-3 px-4 text-gray-600 text-sm">{reservation.lecturer_name}</td>*/}
+          {/*                  /!*<td className="py-3 px-4 text-gray-900">{formatDate(reservation.booked_at)}</td>*!/*/}
+          {/*                  /!*<td className="py-3 px-4 text-gray-900">{formatTime(reservation.start_time)}</td>*!/*/}
+          {/*                  <td className="py-3 px-4">*/}
+          {/*                    <Badge className={*/}
+          {/*                      reservation.status === "confirmed"*/}
+          {/*                        ? "bg-green-100 text-green-700"*/}
+          {/*                        : reservation.status === "pending"*/}
+          {/*                        ? "bg-yellow-100 text-yellow-700"*/}
+          {/*                        : reservation.status === "completed"*/}
+          {/*                        ? "bg-blue-100 text-blue-700"*/}
+          {/*                        : "bg-gray-100 text-gray-700"*/}
+          {/*                    }>*/}
+          {/*                      {getStatusLabel(reservation.status)}*/}
+          {/*                    </Badge>*/}
+          {/*                  </td>*/}
+          {/*                  <td className="py-3 px-4 flex gap-2">*/}
+          {/*                    <button*/}
+          {/*                      onClick={() => handleDeleteReservation(reservation.id)}*/}
+          {/*                      className="p-2 hover:bg-gray-100 rounded transition-colors text-red-600"*/}
+          {/*                      title="Usuń rezerwację"*/}
+          {/*                    >*/}
+          {/*                      <Trash2 size={18} />*/}
+          {/*                    </button>*/}
+          {/*                  </td>*/}
+          {/*                </tr>*/}
+          {/*              ))*/}
+          {/*            )}*/}
+          {/*          </tbody>*/}
+          {/*        </table>*/}
+          {/*      </div>*/}
+          {/*    </CardContent>*/}
+          {/*  </Card>*/}
+          {/*)}*/}
 
           {/* Logs Tab */}
           {activeTab === "logs" && (
@@ -429,20 +655,26 @@ export function AdminPage() {
               <CardContent className="p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-6">Dziennik Systemowy</h2>
                 <div className="space-y-3">
-                  {systemLogs.map((log) => (
-                    <div key={log.id} className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
-                      <div className={`p-2 rounded-lg ${
-                        log.status === "success" ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"
-                      }`}>
-                        {log.status === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                  {systemLogs.length === 0 ? (
+                    <p className="text-gray-600 text-center py-8">Brak wpisów w dzienniku systemowym</p>
+                  ) : (
+                    systemLogs.map((log) => (
+                      <div key={log.id} className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
+                        <div className={`p-2 rounded-lg ${
+                          log.status === "success" ? "bg-green-100 text-green-600" : 
+                          log.status === "warning" ? "bg-yellow-100 text-yellow-600" :
+                          "bg-red-100 text-red-600"
+                        }`}>
+                          {log.status === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{log.action}</p>
+                          <p className="text-sm text-gray-600">Użytkownik: {log.user}</p>
+                        </div>
+                        <p className="text-xs text-gray-600 whitespace-nowrap">{formatTimestamp(log.timestamp)}</p>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{log.action}</p>
-                        <p className="text-sm text-gray-600">Użytkownik: {log.user}</p>
-                      </div>
-                      <p className="text-xs text-gray-600 whitespace-nowrap">{log.timestamp}</p>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
