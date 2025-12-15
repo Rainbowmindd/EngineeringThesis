@@ -12,6 +12,7 @@ import ForgotPasswordPage from "@/components/LoginPage/ForgotPasswordPage.tsx";
 import ResetPasswordPage from '@/components/LoginPage/ResetPasswordConfirmPage.tsx';
 import OAuth2RedirectHandler from "@/components/OAuth2/OAuth2Page.tsx";
 import {ReservationsPage} from "@/components/ReservationsPage/ReservationsPage.tsx";
+import {AdminPage} from "@/components/AdminPage/AdminPage.tsx";
 
 export const router = createBrowserRouter([
     {
@@ -75,5 +76,14 @@ export const router = createBrowserRouter([
 
         ]
     },
+    {
+        element: <ProtectedRoute allowedRoles={["admin"]}/>,
+        children : [
+            {
+                path:'admin-panel',
+                element: <AdminPage/>
+            }
+        ]
+    }
 
 ]);
