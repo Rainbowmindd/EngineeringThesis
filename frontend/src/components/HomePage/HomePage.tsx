@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Calendar, Clock, Users, BookOpen } from 'lucide-react';
-
+import { Link } from 'react-router-dom';
 
 import   HomeHeader   from '../layout/HomeHeader';
 import  Footer  from '../layout/Footer';
@@ -38,9 +38,13 @@ const HomePage: React.FC = () => {
             dogodnym dla Ciebie terminie.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/login">
             <Button size="lg" className="shadow-xl shadow-green-200/50">
               Przeglądaj wykładowców
             </Button>
+                  </Link>
+
+              <Link to="/login">
             <Button
               size="lg"
               variant="outline"
@@ -48,6 +52,7 @@ const HomePage: React.FC = () => {
             >
               Moje konsultacje
             </Button>
+                  </Link>
           </div>
 
           {/* Quick Stats */}
@@ -61,7 +66,7 @@ const HomePage: React.FC = () => {
               <div className="text-sm text-gray-600 mt-1">Zaplanowane konsultacje</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900">8</div>
+              <div className="text-3xl font-bold text-gray-900">5</div>
               <div className="text-sm text-gray-600 mt-1">Przedmiotów w semestrze</div>
             </div>
           </div>
@@ -86,7 +91,7 @@ const HomePage: React.FC = () => {
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription className="text-base">
-                  Automatyczny dostęp do wykładowców z przedmiotów, na które jesteś zapisany w tym semestrze.
+                  Automatyczny dostęp do wykładowców z przedmiotów, na które jesteś zapisany w danym semestrze.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -114,7 +119,7 @@ const HomePage: React.FC = () => {
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription className="text-base">
-                  Automatyczne powiadomienia o zbliżających się konsultacjach na email studencki.
+                  Automatyczne powiadomienia o zbliżających się konsultacjach na email lub telefon.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -157,7 +162,7 @@ const HomePage: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">Potwierdź rezerwację</h3>
               <p className="text-gray-600">
-                Kliknij wybrany termin, dodaj opcjonalnie temat konsultacji i potwierdź rezerwację.
+                Kliknij wybrany termin i potwierdź rezerwację.
               </p>
             </div>
           </div>
@@ -168,8 +173,8 @@ const HomePage: React.FC = () => {
       <section className="py-20 px-4 bg-gray-50">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Szybki dostęp</h2>
-            <p className="text-lg md:text-xl text-gray-600">Najczęściej używane funkcje</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Najczęściej używane funkcje</h2>
+            <p className="text-lg md:text-xl text-gray-600">Wszystko czego potrzebujesz</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -263,9 +268,12 @@ const HomePage: React.FC = () => {
             Sprawdź dostępność swoich wykładowców i umów się na konsultacje już dziś.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to ='/login'>
             <Button size="lg" variant="secondary" className="bg-white text-green-700 hover:bg-gray-100 shadow-xl">
               Przeglądaj wykładowców
             </Button>
+                  </Link>
+              <Link to ='/login'>
             <Button
               size="lg"
               variant="outline"
@@ -273,6 +281,7 @@ const HomePage: React.FC = () => {
             >
               Moje konsultacje
             </Button>
+              </Link>
           </div>
         </div>
       </section>

@@ -28,21 +28,22 @@ const HomeHeader: React.FC = () => {
         </div>
 
         {/* Nawigacja */}
-        <nav className="hidden lg:flex items-center space-x-8">
-          <Link
-            to="/help"
-            className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-          >
-            Pomoc
-          </Link>
+<nav className="hidden lg:flex items-center space-x-8">
+  <Link
+    to="/about"
+    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+  >
+    O systemie
+  </Link>
 
-          <Link
-            to="/about"
-            className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-          >
-            O systemie
-          </Link>
-        </nav>
+  <Link
+    to="/help"
+    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+  >
+    Pomoc
+  </Link>
+</nav>
+
 
         {/* Call To Action */}
         <div>
