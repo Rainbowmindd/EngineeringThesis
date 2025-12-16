@@ -47,35 +47,45 @@ const LecturerHeader: React.FC = () => {
         </div>
 
         {/* Nawigacja */}
-        <nav className="hidden lg:flex items-center space-x-8">
-          <Link
-            to="/lecturer-calendar" // lub /lecturer-schedule
-            className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-          >
-            Mój Kalendarz
-          </Link>
+        <nav className="hidden lg:flex items-center space-x-6">
+  <Link
+    to="/lecturer-dashboard"
+    className="text-gray-900 font-semibold hover:text-green-600 transition-colors"
+  >
+    Mój panel
+  </Link>
 
-          <Link
-            to="/lecturer/reservations" // lub /lecturer-students
-            className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-          >
-            Moje Konsultacje
-          </Link>
+  <Link
+    to="/lecturer-calendar" // lub /lecturer-schedule
+    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+  >
+    Mój harmonogram
+  </Link>
 
-          <Link
-            to="/schedule" // Zakładam, że ścieżka Planu Zajęć jest uniwersalna
-            className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-          >
-            Plan zajęć
-          </Link>
+  {/*<Link*/}
+  {/*  to="/lecturer/reservations" // lub /lecturer-students*/}
+  {/*  className="text-gray-600 hover:text-green-600 transition-colors font-medium"*/}
+  {/*>*/}
+  {/*  Moje konsultacje*/}
+  {/*</Link>*/}
 
-          <Link
-            to="/help"
-            className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-          >
-            Pomoc
-          </Link>
-        </nav>
+  <a
+    href="https://web.usos.agh.edu.pl/kontroler.php?_action=news/default"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+  >
+    Plan zajęć
+  </a>
+
+  <Link
+    to="/help"
+    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+  >
+    Pomoc
+  </Link>
+</nav>
+
 
         {/* Profil i Wylogowanie */}
         <div className="flex items-center space-x-3">

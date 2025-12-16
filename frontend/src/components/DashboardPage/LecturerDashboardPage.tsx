@@ -156,17 +156,17 @@ export function LecturerDashboard() {
             !
           </h1>
           <p className="text-gray-600">
-            Zarządzaj swoimi slotami rezerwacji i konsultacjami
+            Zarządzaj swoimi terminami konsultacji
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           {[
-            ["Łączne sloty", stats.total, Calendar, "green"],
-            ["Aktywne sloty", stats.active, CheckCircle, "blue"],
+            ["Łącznie", stats.total, Calendar, "green"],
+            ["Aktywne", stats.active, CheckCircle, "blue"],
             ["Zapisanych studentów", stats.enrolled, Users, "orange"],
-            ["Całkowita pojemność", stats.capacity, AlertCircle, "purple"],
+            ["Całkowita ilość", stats.capacity, AlertCircle, "purple"],
           ].map(([label, value, Icon, color]: any) => (
             <Card key={label} className="border-0 shadow-sm bg-gradient-to-br from-white to-white">
               <CardContent className="p-6 flex justify-between">
@@ -202,7 +202,7 @@ export function LecturerDashboard() {
               setOpenDialog(true)
             }}
           >
-            <Plus className="h-4 w-4" /> Utwórz nowy slot
+            <Plus className="h-4 w-4" /> Utwórz nowy termin
           </Button>
 
           {/* Dialog */}
@@ -293,7 +293,7 @@ export function LecturerDashboard() {
 
         {/* Slots List */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold mb-4">Moje sloty rezerwacji</h2>
+          <h2 className="text-2xl font-bold mb-4">Moje konsultacje</h2>
           {slots.length === 0 && <p className="text-gray-600">Brak utworzonych slotów.</p>}
           {slots.map((slot) => {
             const start = new Date(slot.start_time)
