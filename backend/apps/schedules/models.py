@@ -146,3 +146,53 @@ class TimeWindow(models.Model):
 
     def __str__(self):
         return f"{self.lecturer.get_full_name()} - {self.day} {self.start_time}-{self.end_time}"
+
+class ScheduleItem(models.Model):
+    """
+    Model representing a class/lecture in a student's schedule
+    """
+    DAY_CHOICES = [
+        ('Poniedziałek', 'Poniedziałek'),
+        ('Wtorek', 'Wtorek'),
+        ('Środa', 'Środa'),
+        ('Czwartek', 'Czwartek'),
+        ('Piątek', 'Piątek'),
+        ('Sobota', 'Sobota'),
+        ('Niedziela', 'Niedziela'),
+    ]
+
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='schedule_items',
+        help_text="Student who owns this schedule item"
+    )
+    subject = models.CharField(
+        max_length=200,
+        help_text="Subject/course name"
+    )
+    day = models.CharField(
+        max_length=20,
+        choices=DAY_CHOICES,
+        help_text="Day of the week"
+    )
+    time = models.CharField(
+        max_length=50,
+        help_text="Time range (e.g., '10:00-12:00')"
+    )
+    location = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Room/building location"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['day', 'time']
+        verbose_name = 'Schedule Item'
+        verbose_name_plural = 'Schedule Items'
+
+    def __str__(self):
+        return f"{self.subject} - {self.day} {self.time}"

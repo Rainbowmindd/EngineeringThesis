@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from .views import LecturerSlotViewSet, PublicAvailableSlotViewSet, LecturerCalendarViewSet, ScheduleExportView, \
-    ScheduleImportView, BlockedTimeViewSet, TimeWindowViewSet
+    ScheduleImportView, BlockedTimeViewSet, TimeWindowViewSet, ScheduleViewSet
 
 router=DefaultRouter()
 
@@ -11,6 +11,7 @@ router.register(r'public-available-slots', PublicAvailableSlotViewSet, basename=
 
 router.register(r'calendar/time-windows', TimeWindowViewSet, basename='time-windows')
 router.register(r'calendar/blocked-times', BlockedTimeViewSet, basename='blocked-times')
+router.register(r'schedule', ScheduleViewSet, basename='schedule')
 
 
 urlpatterns=router.urls + [

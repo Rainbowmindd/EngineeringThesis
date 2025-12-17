@@ -3,8 +3,8 @@ from django.utils import timezone
 from ..reservations.models import Reservation
 from ..reservations.serializers import ReservationSerializer
 from rest_framework.response import Response
-from .models import AvailableSlot, BlockedTime, TimeWindow
-from .serializers import AvailableSlotSerializer, BlockedTimeSerializer, AvailableSlotCreateSerializer,TimeWindowSerializer, BlockedTimeCreateSerializer
+from .models import AvailableSlot, BlockedTime, TimeWindow, ScheduleItem
+from .serializers import AvailableSlotSerializer, ScheduleItemSerializer,BlockedTimeSerializer, ScheduleItemCreateSerializer, AvailableSlotCreateSerializer,TimeWindowSerializer, BlockedTimeCreateSerializer
 from django.http import HttpResponse
 import csv
 import io
@@ -293,3 +293,209 @@ class BlockedTimeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(lecturer=self.request.user)
+
+
+class ScheduleViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing student schedules
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ScheduleItemSerializer
+
+    def get_queryset(self):
+        """
+        Return schedule items only for the authenticated user
+        """
+        return ScheduleItem.objects.filter(student=self.request.user)
+
+    def get_serializer_class(self):
+        """
+        Use different serializer for create/update actions
+        """
+        if self.action in ['create', 'update', 'partial_update']:
+            return ScheduleItemCreateSerializer
+        return ScheduleItemSerializer
+
+    def perform_create(self, serializer):
+        """
+        Save the schedule item with the current user
+        """
+        serializer.save(student=self.request.user)
+
+    @action(detail=False, methods=['post'])
+    def upload(self, request):
+        """
+        Upload schedule from CSV file
+
+        Expected CSV format:
+        subject,day,time,location
+        Matematyka dyskretna,Poniedziałek,10:00-12:00,Bud. A pok. 215
+        """
+        if 'file' not in request.FILES:
+            return Response(
+                {'error': 'No file provided'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        csv_file = request.FILES['file']
+
+        # Validate file extension
+        if not csv_file.name.endswith('.csv'):
+            return Response(
+                {'error': 'File must be a CSV'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Decode the file
+            decoded_file = csv_file.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+
+            created_items = []
+            errors = []
+
+            with transaction.atomic():
+                for row_number, row in enumerate(reader, start=2):
+                    try:
+                        # Validate required fields
+                        required_fields = ['subject', 'day', 'time']
+                        missing_fields = [
+                            field for field in required_fields
+                            if field not in row or not row[field].strip()
+                        ]
+
+                        if missing_fields:
+                            errors.append(
+                                f"Row {row_number}: Missing required fields: {', '.join(missing_fields)}"
+                            )
+                            continue
+
+                        # Create schedule item
+                        schedule_item = ScheduleItem.objects.create(
+                            student=request.user,
+                            subject=row['subject'].strip(),
+                            day=row['day'].strip(),
+                            time=row['time'].strip(),
+                            location=row.get('location', '').strip() or None
+                        )
+                        created_items.append(schedule_item)
+
+                    except Exception as e:
+                        errors.append(f"Row {row_number}: {str(e)}")
+
+            # Serialize created items
+            serializer = ScheduleItemSerializer(created_items, many=True)
+
+            response_data = {
+                'message': f'Successfully imported {len(created_items)} schedule items',
+                'items': serializer.data
+            }
+
+            if errors:
+                response_data['errors'] = errors
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Error processing CSV file: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @action(detail=False, methods=['post'])
+    def upload_ics(self, request):
+        """
+        Upload schedule from Google Calendar ICS file
+        """
+        if 'file' not in request.FILES:
+            return Response(
+                {'error': 'No file provided'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        ics_file = request.FILES['file']
+
+        # Validate file extension
+        if not ics_file.name.endswith('.ics'):
+            return Response(
+                {'error': 'File must be an ICS file'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            from icalendar import Calendar
+            import datetime
+
+            # Parse ICS file
+            ics_content = ics_file.read().decode('utf-8')
+            cal = Calendar.from_ical(ics_content)
+
+            created_items = []
+            errors = []
+
+            # Day mapping
+            day_mapping = {
+                0: 'Poniedziałek',
+                1: 'Wtorek',
+                2: 'Środa',
+                3: 'Czwartek',
+                4: 'Piątek',
+                5: 'Sobota',
+                6: 'Niedziela'
+            }
+
+            with transaction.atomic():
+                for component in cal.walk():
+                    if component.name == "VEVENT":
+                        try:
+                            summary = str(component.get('summary', 'Bez tytułu'))
+                            dtstart = component.get('dtstart').dt
+                            dtend = component.get('dtend').dt
+                            location = str(component.get('location', ''))
+
+                            # Convert to datetime if date only
+                            if isinstance(dtstart, datetime.date) and not isinstance(dtstart, datetime.datetime):
+                                continue  # Skip all-day events
+
+                            # Get day and time
+                            day = day_mapping.get(dtstart.weekday(), 'Poniedziałek')
+                            time = f"{dtstart.strftime('%H:%M')}-{dtend.strftime('%H:%M')}"
+
+                            # Create schedule item
+                            schedule_item = ScheduleItem.objects.create(
+                                student=request.user,
+                                subject=summary,
+                                day=day,
+                                time=time,
+                                location=location if location else None
+                            )
+                            created_items.append(schedule_item)
+
+                        except Exception as e:
+                            errors.append(f"Error processing event '{summary}': {str(e)}")
+                            continue
+
+            # Serialize created items
+            serializer = ScheduleItemSerializer(created_items, many=True)
+
+            response_data = {
+                'message': f'Successfully imported {len(created_items)} events from Google Calendar',
+                'items': serializer.data
+            }
+
+            if errors:
+                response_data['errors'] = errors
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
+        except ImportError:
+            return Response(
+                {'error': 'icalendar library not installed. Run: pip install icalendar'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Error processing ICS file: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )

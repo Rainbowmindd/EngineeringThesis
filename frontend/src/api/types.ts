@@ -61,3 +61,27 @@ export interface Consultaiton {
   status: "confirmed" | "pending" | "cancelled"
   location: string
 }
+
+export interface ScheduleItem {
+  id: number
+  subject: string
+  day: string
+  time: string
+  location?: string
+  user?: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface ScheduleItemCreate {
+  subject: string
+  day: string
+  time: string
+  location?: string
+}
+
+export interface ScheduleUploadResponse {
+  message: string
+  items: ScheduleItem[]
+  errors?: string[]
+}

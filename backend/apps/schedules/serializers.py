@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import models
-from .models import AvailableSlot,  BlockedTime, TimeWindow
+from .models import AvailableSlot,  BlockedTime, TimeWindow, ScheduleItem
 from apps.reservations.models import Reservation
 from apps.users.serializers import UserSerializer
 
@@ -120,3 +120,42 @@ class TimeWindowSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Nieprawidłowy dzień tygodnia. Dozwolone: {', '.join(valid_days)}")
 
         return data
+class ScheduleItemSerializer(serializers.ModelSerializer):
+    """
+    Serializer for ScheduleItem model
+    """
+    class Meta:
+        model = ScheduleItem
+        fields = [
+            'id',
+            'subject',
+            'day',
+            'time',
+            'location',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate_time(self, value):
+        """
+        Validate time format (should be like '10:00-12:00')
+        """
+        if '-' not in value:
+            raise serializers.ValidationError(
+                "Time should be in format 'HH:MM-HH:MM'"
+            )
+        return value
+
+
+class ScheduleItemCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating schedule items
+    """
+    class Meta:
+        model = ScheduleItem
+        fields = ['subject', 'day', 'time', 'location']
+
+    def create(self, validated_data):
+        validated_data['student'] = self.context['request'].user  # ← Zmień user na student
+        return super().create(validated_data)
