@@ -57,7 +57,7 @@ export function LecturerDashboard() {
 
   const fetchSlots = async () => {
     try {
-      const response = await schedulesAPI.getTimeWindows()
+      const response = await schedulesAPI.getLecturerSlots()
       console.log("Pobrane sloty:", response.data) // Dodajemy log
       setSlots(response.data)
     } catch (error) {
@@ -111,7 +111,7 @@ export function LecturerDashboard() {
       alert(`Błąd dezaktywacji: ${error.response?.data?.detail || error.message}`)
     }
   }
-  const handleEdit = (slot: TimeWindow) => {
+  const handleEdit = (slot: LecturerSlot) => {
     const start = new Date(slot.start_time)
     const end = new Date(slot.end_time)
     setFormData({
