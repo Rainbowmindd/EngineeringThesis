@@ -19,24 +19,8 @@ class StudentReservationViewSet(viewsets.ModelViewSet):
         return Reservation.objects.filter(student=self.request.user)
 
     def perform_create(self, serializer):
-        slot = serializer.validated_data['slot']
-
-        #active slot
-        if not slot.is_active:
-            raise PermissionDenied("Slot jest nieaktywny")
-
-        #future slot
-        if slot.start_time <= timezone.now():
-            raise PermissionDenied("ten slot juz sie skonczyl")
-
-        #cyz sa wolne miejsca
-        if slot.reservations.count() >= slot.max_attendees:
-            raise PermissionDenied("Brak wolnych miejsc")
-        #student ma juz rezerwacje na ten slot
-        if Reservation.objects.filter(slot=slot, student=self.request.user).exists():
-            raise PermissionDenied("Juz masz rezerwacje na ten slot")
-
         serializer.save(student=self.request.user)
+
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):

@@ -32,7 +32,7 @@ class SlotDetailsSerializer(serializers.ModelSerializer):
 
 class ReservationSerializer(serializers.ModelSerializer):
     slot = SlotDetailsSerializer(read_only=True)
-    slot_id = serializers.IntegerField(write_only=True, required=False)
+    slot_id = serializers.IntegerField(write_only=True, required=True)  # ← Zmień required=True
 
     class Meta:
         model = Reservation
@@ -40,11 +40,31 @@ class ReservationSerializer(serializers.ModelSerializer):
         read_only_fields = ('student', 'status', 'booked_at')
 
     def create(self, validated_data):
-        validated_data['status'] = 'Pending'
-        slot_id = validated_data.pop('slot_id', None)
-        if slot_id:
-            validated_data['slot_id'] = slot_id
-        reservation = Reservation.objects.create(**validated_data)
+        print("🔍 validated_data:", validated_data)  # Debug
+        print("🔍 initial_data:", self.initial_data)  # Debug
+
+        slot_id = validated_data.get('slot_id')  # ← Użyj get() zamiast pop()
+
+        if not slot_id:
+            raise serializers.ValidationError({"slot_id": "Slot jest wymagany."})
+
+        try:
+            slot = AvailableSlot.objects.get(id=slot_id)
+        except AvailableSlot.DoesNotExist:
+            raise serializers.ValidationError({"slot_id": "Ten slot nie istnieje."})
+
+        # Walidacje
+        if not slot.is_active:
+            raise serializers.ValidationError({"slot_id": "Ten slot jest nieaktywny."})
+
+        # Utwórz rezerwację
+        reservation = Reservation.objects.create(
+            slot=slot,
+            student=self.context['request'].user,
+            topic=validated_data.get('topic', ''),
+            status='Pending'
+        )
+
         return reservation
 
     def validate_slot_id(self, value):
