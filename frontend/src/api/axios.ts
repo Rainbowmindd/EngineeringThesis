@@ -1,21 +1,26 @@
 import axios from "axios";
 
-// Wybierz URL na podstawie środowiska
 const API_URL = import.meta.env.DEV
   ? import.meta.env.VITE_API_URL_DEV
   : import.meta.env.VITE_API_URL_PROD;
 
 const api = axios.create({
   baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
   withCredentials: true,
 });
 
-// interceptor
+// 🔥 KLUCZOWY INTERCEPTOR
 api.interceptors.request.use(
   (config) => {
+    if (config.data instanceof FormData) {
+      if (config.headers?.["Content-Type"]) {
+        delete config.headers["Content-Type"];
+      }
+    } else {
+      config.headers = config.headers ?? {};
+      config.headers["Content-Type"] = "application/json";
+    }
+
     const url = config.url ?? "";
 
     const isPublicEndpoint =
@@ -24,19 +29,16 @@ api.interceptors.request.use(
       url.includes("/api/users/token/refresh/");
 
     if (isPublicEndpoint) {
-      if (config.headers?.Authorization) {
-        delete config.headers.Authorization;
-      }
+      delete config.headers?.Authorization;
       return config;
     }
 
     const token = localStorage.getItem("authToken");
 
     if (token && token !== "null" && token !== "undefined") {
-      config.headers = config.headers ?? {};
       config.headers.Authorization = "Bearer " + token;
-    } else if (config.headers?.Authorization) {
-      delete config.headers.Authorization;
+    } else {
+      delete config.headers?.Authorization;
     }
 
     return config;

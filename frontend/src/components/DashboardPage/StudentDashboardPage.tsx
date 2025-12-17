@@ -353,35 +353,35 @@ const handleAddScheduleItem = async () => {
               </CardContent>
             </Card>
 
-            {/* CSV Upload */}
-            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Upload className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 mb-1">Wgraj plik CSV</h3>
-                    <p className="text-sm text-gray-600 mb-4">Importuj plan z pliku</p>
-                    <label className="block">
-                      <input
-                        type="file"
-                        accept=".csv"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
-                      <Button
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white w-full cursor-pointer"
-                        onClick={() => document.querySelector('input[type="file"][accept=".csv"]')?.click()}
-                      >
-                        Wybierz plik
-                      </Button>
-                    </label>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/*/!* CSV Upload *!/*/}
+            {/*<Card className="border-0 shadow-sm hover:shadow-md transition-shadow">*/}
+            {/*  <CardContent className="p-6">*/}
+            {/*    <div className="flex items-start space-x-4">*/}
+            {/*      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">*/}
+            {/*        <Upload className="h-6 w-6 text-purple-600" />*/}
+            {/*      </div>*/}
+            {/*      <div className="flex-1 min-w-0">*/}
+            {/*        <h3 className="font-semibold text-gray-900 mb-1">Wgraj plik CSV</h3>*/}
+            {/*        <p className="text-sm text-gray-600 mb-4">Importuj plan z pliku</p>*/}
+            {/*        <label className="block">*/}
+            {/*          <input*/}
+            {/*            type="file"*/}
+            {/*            accept=".csv"*/}
+            {/*            className="hidden"*/}
+            {/*            onChange={handleFileUpload}*/}
+            {/*          />*/}
+            {/*          <Button*/}
+            {/*            size="sm"*/}
+            {/*            className="bg-purple-600 hover:bg-purple-700 text-white w-full cursor-pointer"*/}
+            {/*            onClick={() => document.querySelector('input[type="file"][accept=".csv"]')?.click()}*/}
+            {/*          >*/}
+            {/*            Wybierz plik*/}
+            {/*          </Button>*/}
+            {/*        </label>*/}
+            {/*      </div>*/}
+            {/*    </div>*/}
+            {/*  </CardContent>*/}
+            {/*</Card>*/}
 
             {/* Google Calendar Upload */}
             <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">

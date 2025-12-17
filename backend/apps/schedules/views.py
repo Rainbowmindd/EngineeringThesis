@@ -1,3 +1,4 @@
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets, permissions
 from django.utils import timezone
 from ..reservations.models import Reservation
@@ -301,6 +302,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ScheduleItemSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         """
