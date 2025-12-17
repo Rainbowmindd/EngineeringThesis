@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from datetime import date as datetime_date
 
 class AvailableSlot(models.Model):
     #relacja dla prowadzacego ktory utworzyl ten slot
@@ -61,8 +62,13 @@ class BlockedTime(models.Model):
         on_delete=models.CASCADE,
         related_name='blocked_times'
     )
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    date = models.DateField(
+        default=datetime_date.today,
+        verbose_name="Data zablokowania",
+        help_text="Konkretna data (YYYY-MM-DD)"
+    )
+    start_time = models.TimeField()
+    end_time = models.TimeField()
     reason = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
@@ -73,3 +79,70 @@ class BlockedTime(models.Model):
     def __str__(self):
         return f"{self.lecturer.get_full_name()} blocked {self.start_time} - {self.end_time}"
 
+
+class TimeWindow(models.Model):
+    """
+    Cykliczny szablon dostępności (np. 'każdy poniedziałek 8-11').
+    Na podstawie tego będą generowane AvailableSlot.
+    """
+    DAY_CHOICES = [
+        ('Poniedziałek', 'Poniedziałek'),
+        ('Wtorek', 'Wtorek'),
+        ('Środa', 'Środa'),
+        ('Czwartek', 'Czwartek'),
+        ('Piątek', 'Piątek'),
+        ('Sobota', 'Sobota'),
+        ('Niedziela', 'Niedziela'),
+    ]
+
+    lecturer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='time_windows'
+    )
+
+    # Dzień tygodnia (cykliczny)
+    day = models.CharField(
+        max_length=15,
+        choices=DAY_CHOICES,
+        verbose_name="Dzień tygodnia"
+    )
+
+    # Godziny (tylko czas, nie data)
+    start_time = models.TimeField(verbose_name="Godzina rozpoczęcia")
+    end_time = models.TimeField(verbose_name="Godzina zakończenia")
+
+    # Szczegóły
+    max_attendees = models.PositiveSmallIntegerField(
+        default=5,
+        verbose_name="Maksymalna liczba studentów"
+    )
+    meeting_location = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Miejsce spotkania"
+    )
+    subject = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Przedmiot"
+    )
+
+    # Status
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Czy aktywne"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['day', 'start_time']
+        verbose_name = "Okno dostępności"
+        verbose_name_plural = "Okna dostępności"
+
+    def __str__(self):
+        return f"{self.lecturer.get_full_name()} - {self.day} {self.start_time}-{self.end_time}"

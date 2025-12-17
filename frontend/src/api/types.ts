@@ -26,18 +26,18 @@ interface CalendarDay {
 
 export interface TimeWindow {
   id: number;
+  day: string;
   start_time: string;
   end_time: string;
-  meeting_location: string;
+  meeting_location?: string;
   max_attendees: number;
   is_active: boolean;
-  reservations_count?: number;
-  lecturer_details?: string;
   subject?: string;
 }
 
 export interface BlockedTime {
   id: number
+    date: string
   start_time: string
   end_time: string
   reason: string
@@ -48,6 +48,7 @@ export interface Reservation {
   start_time: string
   status: "Confirmed" | "Pending" | "Completed"
   student_name?: string
+    subject?: string
 }
 
 // ui only

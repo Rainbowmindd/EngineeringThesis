@@ -31,9 +31,9 @@ export const schedulesAPI = {
         api.put<TimeWindow>(`${BASE_URL}/calendar/time-windows/${id}/`, data),
 
     deleteTimeWindow: (id: number) =>
-        api.patch(`${BASE_URL}/calendar/time-windows/${id}/`,{
-        is_active: false,
-        }),
+    api.delete(`${BASE_URL}/calendar/time-windows/${id}/`),
+    bulkCreateTimeWindows: (data: any[]) =>
+        api.post(`${BASE_URL}/calendar/time-windows/bulk_create/`, data),
 
     //zablokowane okresy
     getBlockedTimes: () =>
@@ -41,6 +41,13 @@ export const schedulesAPI = {
 
     createBlockedTime: (data: Omit<BlockedTime, "id">) =>
         api.post<BlockedTime>(`${BASE_URL}/calendar/blocked-times/`, data),
+    updateBlockedTime: (id: number, data: Partial<BlockedTime>) =>
+    api.put<BlockedTime>(`${BASE_URL}/calendar/blocked-times/${id}/`, data),
+
+    deleteBlockedTime: (id: number) =>
+        api.delete(`${BASE_URL}/calendar/blocked-times/${id}/`),
+    bulkCreateTimeWindows: (data: any[]) =>
+    api.post(`${BASE_URL}/calendar/time-windows/bulk_create/`, data),
 
     // //rezerwacje konsultacji
     // getReservations: () =>

@@ -3,8 +3,8 @@ from django.utils import timezone
 from ..reservations.models import Reservation
 from ..reservations.serializers import ReservationSerializer
 from rest_framework.response import Response
-from .models import AvailableSlot, BlockedTime
-from .serializers import AvailableSlotSerializer, BlockedTimeSerializer, AvailableSlotCreateSerializer, BlockedTimeCreateSerializer
+from .models import AvailableSlot, BlockedTime, TimeWindow
+from .serializers import AvailableSlotSerializer, BlockedTimeSerializer, AvailableSlotCreateSerializer,TimeWindowSerializer, BlockedTimeCreateSerializer
 from django.http import HttpResponse
 import csv
 import io
@@ -13,6 +13,8 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.decorators import action
 from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+
 
 from apps.users.permissions import IsLecturer, IsStudent
 
@@ -239,3 +241,55 @@ class ScheduleImportView(APIView):
         return Response({"message": f"Pomyślnie zaimportowano {imported_count} pozycji."},
                         status=status.HTTP_201_CREATED)
 
+
+class TimeWindowViewSet(viewsets.ModelViewSet):
+    """
+    CRUD dla TimeWindow - CYKLICZNE okna dostępności (np. każdy poniedziałek 10-12)
+    Używane w kalendarzu prowadzącego
+    """
+    serializer_class = TimeWindowSerializer
+    permission_classes = [permissions.IsAuthenticated, IsLecturer]
+
+    def get_queryset(self):
+        return TimeWindow.objects.filter(
+            lecturer=self.request.user,
+            is_active=True
+        ).order_by('day', 'start_time')
+
+    def perform_create(self, serializer):
+        serializer.save(lecturer=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete - oznacz jako nieaktywne"""
+        instance = get_object_or_404(TimeWindow, id=kwargs['pk'], lecturer=request.user)
+        instance.is_active = False
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['post'])
+    def bulk_create(self, request):
+        """Import wielu TimeWindows z ICS"""
+        windows_data = request.data
+        created = []
+        for window in windows_data:
+            serializer = self.get_serializer(data=window)
+            if serializer.is_valid():
+                serializer.save(lecturer=request.user)
+                created.append(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(created, status=status.HTTP_201_CREATED)
+
+
+class BlockedTimeViewSet(viewsets.ModelViewSet):
+    """
+    CRUD dla BlockedTime - jednorazowe blokady
+    """
+    serializer_class = BlockedTimeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return BlockedTime.objects.filter(lecturer=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(lecturer=self.request.user)

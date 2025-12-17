@@ -30,7 +30,7 @@ export function ReservationsPage() {
     setLoading(true)
     try {
       const response = await schedulesAPI.getPublicSlots()
-      console.log("Dostępne sloty:", response.data)
+      console.log("Dostępne konsultacje:", response.data)
 
       // Filtruj tylko aktywne sloty z wolnymi miejscami
       const activeSlots = response.data.filter(slot => {
@@ -132,16 +132,16 @@ export function ReservationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 to-white">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             Dostępne <span className="text-green-600">rezerwacje</span>
           </h1>
-          <p className="text-gray-600">Przeglądaj i rezerwuj sloty konsultacji u wykładowców</p>
+          <p className="text-gray-600">Przeglądaj i rezerwuj terminy konsultacji</p>
         </div>
 
         {/* Stats Cards */}
@@ -150,7 +150,7 @@ export function ReservationsPage() {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium mb-2">Dostępne sloty</p>
+                  <p className="text-gray-600 text-sm font-medium mb-2">Dostępne terminy</p>
                   <p className="text-3xl font-bold text-gray-900">{stats.available}</p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -251,7 +251,7 @@ export function ReservationsPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900">
-              {filteredSlots.length} dostępnych slotów
+              {filteredSlots.length} dostępnych terminów
             </h2>
           </div>
 
@@ -260,7 +260,7 @@ export function ReservationsPage() {
               <CardContent className="p-12 text-center">
                 <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-4">
-                  Brak dostępnych slotów spełniających kryteria wyszukiwania.
+                  Brak dostępnych terminów spełniających kryteria wyszukiwania.
                 </p>
                 <Button
                   onClick={() => {
