@@ -139,6 +139,11 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher', #nowe hasla hashowane przez argon2
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher', #stare nadal hashowane przez pbkdf2
+]
+
 #for now for development purposes
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 #POTEM zamienic na smtp zamiast console backend
