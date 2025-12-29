@@ -1,7 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { Login } from '../pages/Login'
 import { Register } from '../pages/Register'
-//import { Dashboard } from '../pages/Dashboard'
 import { Home } from '../pages/Home'
 import { ProtectedRoute } from '../components/ProtectedRoutes/ProtectedRoute'
 import { AuthRedirect } from '../components/ProtectedRoutes/AuthRedirect'
@@ -13,13 +12,14 @@ import ResetPasswordPage from '@/components/LoginPage/ResetPasswordConfirmPage.t
 import OAuth2RedirectHandler from "@/components/OAuth2/OAuth2Page.tsx";
 import {ReservationsPage} from "@/components/ReservationsPage/ReservationsPage.tsx";
 import {AdminPage} from "@/components/AdminPage/AdminPage.tsx";
+import LecturerReservationsPage from "@/components/LecturerReservationsPage/LecturerReservationsPage.tsx"; // ✅ DODAJ
 
 export const router = createBrowserRouter([
     {
         path: '/',
         element: <Home />
     },
-    //przekierowanie dla niezalogowanych uzygtkownikow:
+    // Przekierowanie dla niezalogowanych użytkowników:
     {
         element: <AuthRedirect/>,
         children: [
@@ -46,22 +46,26 @@ export const router = createBrowserRouter([
         ]
     },
 
-    //przekierowanie dla zalogowanych uzytkownikow (protected route)
+    // Przekierowanie dla zalogowanych użytkowników - LECTURER
     {
         element: <ProtectedRoute allowedRoles={["lecturer"]}/>,
         children : [
             {
                 path: 'lecturer-dashboard',
                 element: <LecturerDashboard />
-                // path: 'student-dashboard',
-                //  element: <StudentDashboard />
             },
             {
                 path: 'lecturer-calendar',
                 element: <CalendarPage />
+            },
+            {
+                path: 'lecturer-reservations',
+                element: <LecturerReservationsPage />
             }
         ]
     },
+
+    // Przekierowanie dla zalogowanych użytkowników - STUDENT
     {
         element: <ProtectedRoute allowedRoles={["student"]}/>,
         children : [
@@ -72,10 +76,11 @@ export const router = createBrowserRouter([
             {
                 path: 'student-reservations',
                 element: <ReservationsPage />
-            },
-
+            }
         ]
     },
+
+    // Admin
     {
         element: <ProtectedRoute allowedRoles={[]} />,
         children : [
@@ -85,5 +90,4 @@ export const router = createBrowserRouter([
             }
         ]
     }
-
 ]);

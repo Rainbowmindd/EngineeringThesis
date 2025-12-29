@@ -1,68 +1,308 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Reservation
-from .serializers import ReservationSerializer
-from apps.users.permissions import IsLecturer, IsStudent
-from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.db.models import Q
+
+from .models import Reservation
+from .serializers import (
+    ReservationSerializer,
+    AcceptReservationSerializer,
+    RejectReservationSerializer
+)
+from apps.users.permissions import IsLecturer, IsStudent
 
 
 class StudentReservationViewSet(viewsets.ModelViewSet):
-    #Student moze tworzyc, przegladac, anulowac swoje rezerwacje
-    #post, get , delete
+    """
+    ViewSet dla studenta - może tworzyć, przeglądać i anulować swoje rezerwacje
+
+    Endpoints:
+    - GET /api/reservations/student/ - lista swoich rezerwacji
+    - POST /api/reservations/student/ - nowa rezerwacja (status: pending)
+    - GET /api/reservations/student/{id}/ - szczegóły rezerwacji
+    - DELETE /api/reservations/student/{id}/ - usuń rezerwację
+    - POST /api/reservations/student/{id}/cancel/ - anuluj rezerwację
+    """
     serializer_class = ReservationSerializer
     permission_classes = [IsStudent]
 
     def get_queryset(self):
-        #student widzi tylko swoje rezerwacje
-        return Reservation.objects.filter(student=self.request.user)
+        """Student widzi tylko swoje rezerwacje"""
+        return Reservation.objects.filter(
+            student=self.request.user
+        ).select_related('slot', 'slot__lecturer', 'accepted_by')
 
     def perform_create(self, serializer):
+        """Automatycznie przypisz studenta przy tworzeniu"""
         serializer.save(student=self.request.user)
-
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
+        """
+        Anulowanie rezerwacji przez studenta
+        Można anulować tylko rezerwacje ze statusem 'pending' lub 'accepted'
+        """
         reservation = self.get_object()
 
-        if reservation.student!=request.user:
-            return Response({"detail":"Nie masz uprawnień do anulowania tej rezerwacji."}, status=status.HTTP_403_FORBIDDEN)
+        # Sprawdź uprawnienia
+        if reservation.student != request.user:
+            return Response(
+                {"detail": "Nie masz uprawnień do anulowania tej rezerwacji."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        if reservation.status in ('Completed', 'Cancelled', 'No-Show Student', 'No-Show Lecturer'):
-            return Response({"detail":"Nie można anulować tej rezerwacji."}, status=status.HTTP_400_BAD_REQUEST)
+        # Sprawdź czy można anulować
+        if not reservation.can_be_cancelled():
+            return Response(
+                {
+                    "detail": f"Nie można anulować rezerwacji o statusie: {reservation.get_status_display()}"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        reservation.status = 'Cancelled'
+        # Sprawdź czy nie jest za późno (np. 1h przed spotkaniem)
+        if reservation.slot.start_time - timezone.now() < timezone.timedelta(hours=1):
+            return Response(
+                {"detail": "Nie można anulować rezerwacji na mniej niż 1 godzinę przed spotkaniem."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Anuluj rezerwację
+        reservation.status = 'cancelled'
         reservation.save()
 
-        #Tu powiadomienie
-        return Response({"status": "Rezerwacja anulowana."}, status=status.HTTP_200_OK)
+        # TODO: Wyślij powiadomienie do prowadzącego
+        # from .tasks import notify_lecturer_cancellation
+        # notify_lecturer_cancellation.delay(reservation.pk)
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Rezerwacja została anulowana.",
+                "reservation": ReservationSerializer(reservation).data
+            },
+            status=status.HTTP_200_OK
+        )
+
 
 class LecturerReservationViewSet(viewsets.ModelViewSet):
-    #Prowadzacy moze przegladac rezerwacje swoich slotow i zmieniac ich status
+    """
+    ViewSet dla prowadzącego - może przeglądać rezerwacje swoich slotów i zarządzać nimi
 
+    Endpoints:
+    - GET /api/reservations/lecturer/ - lista rezerwacji swoich slotów
+    - GET /api/reservations/lecturer/{id}/ - szczegóły rezerwacji
+    - POST /api/reservations/lecturer/{id}/accept/ - zaakceptuj rezerwację
+    - POST /api/reservations/lecturer/{id}/reject/ - odrzuć rezerwację
+    - POST /api/reservations/lecturer/{id}/update_status/ - zmień status (completed, no-show, etc.)
+    """
     serializer_class = ReservationSerializer
     permission_classes = [IsLecturer]
+    http_method_names = ['get', 'post', 'head', 'options']  # Tylko GET i POST
 
     def get_queryset(self):
-        #Prowadzacy widzi rezerwacje tylko swoich slotow
-        return Reservation.objects.filter(slot__lecturer=self.request.user)
+        """Prowadzący widzi rezerwacje tylko swoich slotów"""
+        queryset = Reservation.objects.filter(
+            slot__lecturer=self.request.user
+        ).select_related('slot', 'student', 'accepted_by')
 
-    #Metoda do zmiany statusu rezerwacji (np zakonczona / nieobecnosc)
+        # Filtrowanie po statusie przez query params
+        status_filter = self.request.query_params.get('status', None)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        return queryset
+
+    @action(detail=True, methods=['post'], serializer_class=AcceptReservationSerializer)
+    def accept(self, request, pk=None):
+        """
+        Akceptacja rezerwacji przez prowadzącego
+
+        Body: {} (puste)
+        """
+        reservation = self.get_object()
+
+        # Sprawdź uprawnienia
+        if reservation.slot.lecturer != request.user:
+            return Response(
+                {"detail": "Nie masz uprawnień do akceptacji tej rezerwacji."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Sprawdź czy można zaakceptować
+        if not reservation.can_be_accepted():
+            return Response(
+                {
+                    "detail": f"Nie można zaakceptować rezerwacji o statusie: {reservation.get_status_display()}"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Sprawdź czy nie przekroczymy limitu miejsc
+        accepted_count = Reservation.objects.filter(
+            slot=reservation.slot,
+            status='accepted'
+        ).count()
+
+        if accepted_count >= reservation.slot.max_attendees:
+            return Response(
+                {"detail": "Osiągnięto maksymalną liczbę zaakceptowanych rezerwacji dla tego slotu."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Zaakceptuj rezerwację
+        reservation.status = 'accepted'
+        reservation.accepted_at = timezone.now()
+        reservation.accepted_by = request.user
+        reservation.save()
+
+        # TODO: Wyślij powiadomienie do studenta
+        # from .tasks import notify_student_accepted
+        # notify_student_accepted.delay(reservation.pk)
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Rezerwacja została zaakceptowana.",
+                "reservation": ReservationSerializer(reservation).data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], serializer_class=RejectReservationSerializer)
+    def reject(self, request, pk=None):
+        """
+        Odrzucenie rezerwacji przez prowadzącego
+
+        Body: {
+            "reason": "opcjonalny powód odrzucenia"
+        }
+        """
+        reservation = self.get_object()
+
+        # Sprawdź uprawnienia
+        if reservation.slot.lecturer != request.user:
+            return Response(
+                {"detail": "Nie masz uprawnień do odrzucenia tej rezerwacji."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Sprawdź czy można odrzucić
+        if not reservation.can_be_rejected():
+            return Response(
+                {
+                    "detail": f"Nie można odrzucić rezerwacji o statusie: {reservation.get_status_display()}"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Pobierz powód odrzucenia
+        serializer = RejectReservationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        reason = serializer.validated_data.get('reason', 'Brak podanego powodu')
+
+        # Odrzuć rezerwację
+        reservation.status = 'rejected'
+        reservation.rejection_reason = reason
+        reservation.save()
+
+        # TODO: Wyślij powiadomienie do studenta
+        # from .tasks import notify_student_rejected
+        # notify_student_rejected.delay(reservation.pk)
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Rezerwacja została odrzucona.",
+                "reservation": ReservationSerializer(reservation).data
+            },
+            status=status.HTTP_200_OK
+        )
+
     @action(detail=True, methods=['post'])
     def update_status(self, request, pk=None):
+        """
+        Zmiana statusu rezerwacji (np. completed, no_show_student, no_show_lecturer)
+        Używane TYLKO dla zaakceptowanych rezerwacji po zakończeniu spotkania
+
+        Body: {
+            "status": "completed" | "no_show_student" | "no_show_lecturer"
+        }
+        """
         reservation = self.get_object()
-        new_status=request.data.get('status') #oczekujemy na completed
+        new_status = request.data.get('status')
 
-        if not new_status or new_status not in dict(Reservation.STATUS_CHOICES):
-            return Response({"detail":"Nieprawidłowy status."}, status=status.HTTP_400_BAD_REQUEST)
-
-        #sprawdzenie czy rezerwacja nalezy do prowadzacego
+        # Sprawdź uprawnienia
         if reservation.slot.lecturer != request.user:
-            return Response({"detail":"Nie masz uprawnień do zmiany tej rezerwacji."}, status=status.HTTP_403_FORBIDDEN)
+            return Response(
+                {"detail": "Nie masz uprawnień do zmiany tej rezerwacji."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        # Walidacja statusu
+        allowed_statuses = ['completed', 'no_show_student', 'no_show_lecturer']
+        if not new_status or new_status not in allowed_statuses:
+            return Response(
+                {
+                    "detail": f"Nieprawidłowy status. Dozwolone: {', '.join(allowed_statuses)}"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Można zmieniać status tylko zaakceptowanych rezerwacji
+        if reservation.status != 'accepted':
+            return Response(
+                {
+                    "detail": "Można zmienić status tylko zaakceptowanych rezerwacji."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Można oznaczać jako completed/no-show tylko po czasie spotkania
+        if reservation.slot.end_time > timezone.now():
+            return Response(
+                {"detail": "Nie można zmienić statusu przed zakończeniem spotkania."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Zmień status
         reservation.status = new_status
         reservation.save()
 
-        #powiadomienie
-        return Response(ReservationSerializer(reservation).data, status=status.HTTP_200_OK)
+        # TODO: Wyślij powiadomienie do studenta (jeśli no-show)
+        # if new_status in ['no_show_student', 'no_show_lecturer']:
+        #     from .tasks import notify_student_no_show
+        #     notify_student_no_show.delay(reservation.pk)
+
+        return Response(
+            {
+                "status": "success",
+                "message": f"Status rezerwacji zmieniony na: {reservation.get_status_display()}",
+                "reservation": ReservationSerializer(reservation).data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['get'])
+    def statistics(self, request):
+        """
+        Statystyki rezerwacji dla prowadzącego
+
+        GET /api/reservations/lecturer/statistics/
+        """
+        reservations = self.get_queryset()
+
+        stats = {
+            'total': reservations.count(),
+            'pending': reservations.filter(status='Pending').count(),
+            'accepted': reservations.filter(status='Accepted').count(),
+            'rejected': reservations.filter(status='Rejected').count(),
+            'cancelled': reservations.filter(status='Cancelled').count(),
+            'completed': reservations.filter(status='Completed').count(),
+            'no_show_student': reservations.filter(status='No_show_student').count(),
+            'no_show_lecturer': reservations.filter(status='No_show_lecturer').count(),
+        }
+
+        return Response(stats, status=status.HTTP_200_OK)
