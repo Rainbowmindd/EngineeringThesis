@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction
 from django.utils import timezone
@@ -20,7 +20,7 @@ class Reservation(models.Model):
         ('no_show_lecturer', 'Nieobecność Prowadzącego'),
     ]
 
-    #relacje
+    # Relacje
     slot = models.ForeignKey(
         AvailableSlot,
         on_delete=models.CASCADE,
@@ -118,34 +118,51 @@ class Reservation(models.Model):
         return self.status in ['pending', 'accepted']
 
 
+# ============= SIGNALS =============
+
 @receiver(post_save, sender=Reservation)
-def handle_reservation_changes(sender, instance, created, **kwargs):
-
+def handle_reservation_creation(sender, instance, created, **kwargs):
+    """
+    Signal uruchamiany po zapisaniu rezerwacji
+    Obsługuje TWORZENIE nowej rezerwacji
+    """
     if created:
-
-        from .tasks import notify_lecturer_new_reservation, send_reservation_confirmation_email
+        # NOWA REZERWACJA - wysyłamy powiadomienia (EMAIL + SMS)
+        from .tasks import (
+            notify_lecturer_new_reservation,
+            send_reservation_confirmation_email,
+            send_sms_lecturer_new_reservation,
+            send_sms_student_reservation_confirmed
+        )
 
         print(f"Nowa rezerwacja #{instance.pk} utworzona (status: {instance.status})")
 
+        # EMAIL dla prowadzącego
         transaction.on_commit(
             lambda: notify_lecturer_new_reservation.delay(instance.pk)
         )
 
+        # EMAIL potwierdzenia dla studenta
         transaction.on_commit(
             lambda: send_reservation_confirmation_email.delay(instance.pk)
         )
 
-    else:
-        from .tasks import notify_student_status_change
-        print(f"Rezerwacja #{instance.pk} zaktualizowana (status: {instance.status})")
+        # SMS dla prowadzącego
+        transaction.on_commit(
+            lambda: send_sms_lecturer_new_reservation.delay(instance.pk)
+        )
 
-        if instance.status in ['accepted', 'rejected']:
-            transaction.on_commit(
-                lambda: notify_student_status_change.delay(instance.pk)
-            )
+        # SMS potwierdzenia dla studenta
+        transaction.on_commit(
+            lambda: send_sms_student_reservation_confirmed.delay(instance.pk)
+        )
+
 
 @receiver(post_save, sender=Reservation)
 def schedule_auto_reject(sender, instance, created, **kwargs):
+    """
+    Planuje automatyczne odrzucenie rezerwacji po 24h jeśli nie zostanie zaakceptowana
+    """
     if created and instance.status == 'pending':
         from .tasks import auto_reject_expired_reservation
 
@@ -159,3 +176,36 @@ def schedule_auto_reject(sender, instance, created, **kwargs):
         )
 
         print(f"Zaplanowano auto-reject dla rezerwacji #{instance.pk} na {eta}")
+
+
+@receiver(pre_save, sender=Reservation)
+def handle_status_change(sender, instance, **kwargs):
+    """
+    Signal uruchamiany PRZED zapisaniem rezerwacji
+    Sprawdza czy status się zmienił i wysyła powiadomienia
+    """
+    if instance.pk:  # Tylko dla istniejących rezerwacji (nie nowych)
+        try:
+            old_instance = Reservation.objects.get(pk=instance.pk)
+
+            # Sprawdź czy status się zmienił na accepted lub rejected
+            if old_instance.status != instance.status and instance.status in ['accepted', 'rejected']:
+                from .tasks import (
+                    notify_student_status_change,
+                    send_sms_student_status_change
+                )
+
+                print(f"Status rezerwacji #{instance.pk} zmieniony: {old_instance.status} -> {instance.status}")
+
+                # Wyślij EMAIL i SMS PO zapisaniu (transaction.on_commit)
+                transaction.on_commit(
+                    lambda: notify_student_status_change.delay(instance.pk)
+                )
+
+                transaction.on_commit(
+                    lambda: send_sms_student_status_change.delay(instance.pk)
+                )
+
+        except Reservation.DoesNotExist:
+            # Nowa rezerwacja - obsługiwane przez post_save
+            pass

@@ -9,5 +9,13 @@ class User(AbstractUser):
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
 
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        default='+48607055028',
+        verbose_name='Numer telefonu',
+        help_text='Format: +48123456789'
+    )
     def __str__(self):
         return f"{self.username} ({self.role})"

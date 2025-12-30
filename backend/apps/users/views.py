@@ -13,6 +13,11 @@ from apps.reservations.models import Reservation
 from apps.schedules.models import AvailableSlot
 import json
 
+# Password Reset imports
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+
 from ..reservations.serializers import ReservationSerializer
 
 logger = logging.getLogger(__name__)
@@ -90,6 +95,133 @@ class LoginView(APIView):
                 'role': user.role
             },
         })
+
+
+# =========================
+# PASSWORD RESET VIEWS
+# =========================
+
+class PasswordResetRequestView(APIView):
+    """
+    Endpoint do wysłania emaila z linkiem resetu hasła
+
+    POST /api/users/password-reset/
+    Body: { "email": "user@example.com" }
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+
+        if not email:
+            return Response(
+                {"detail": "Email jest wymagany."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(email=email, is_active=True)
+
+            # Generuj token i UID
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Wyślij email przez Celery (asynchronicznie)
+            from .tasks import send_password_reset_email
+            send_password_reset_email.delay(user.pk, uid, token)
+
+            logger.info(f"Password reset email requested for: {email}")
+
+            return Response(
+                {
+                    "detail": "Email z instrukcjami resetu hasła został wysłany.",
+                    "success": True
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except User.DoesNotExist:
+            # Z bezpieczeństwa zawsze zwracamy sukces (nie zdradzamy czy email istnieje)
+            logger.warning(f"Password reset requested for non-existent email: {email}")
+            return Response(
+                {
+                    "detail": "Email z instrukcjami resetu hasła został wysłany.",
+                    "success": True
+                },
+                status=status.HTTP_200_OK
+            )
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    Endpoint do zmiany hasła po kliknięciu w link z emaila
+
+    POST /api/users/password-reset-confirm/<uidb64>/<token>/
+    Body: {
+        "new_password": "newpassword123",
+        "confirm_password": "newpassword123"
+    }
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, uidb64, token):
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        # Walidacja
+        if not new_password or not confirm_password:
+            return Response(
+                {"detail": "Oba pola hasła są wymagane."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if new_password != confirm_password:
+            return Response(
+                {"detail": "Hasła nie są identyczne."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if len(new_password) < 8:
+            return Response(
+                {"detail": "Hasło musi mieć minimum 8 znaków."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Dekoduj UID
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+
+            # Sprawdź token
+            if not default_token_generator.check_token(user, token):
+                return Response(
+                    {"detail": "Link wygasł lub jest nieprawidłowy."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Zmień hasło
+            user.set_password(new_password)
+            user.save()
+
+            # Wyślij email potwierdzenia
+            from .tasks import send_password_reset_success_email
+            send_password_reset_success_email.delay(user.pk)
+
+            logger.info(f"Password successfully reset for user: {user.email}")
+
+            return Response(
+                {
+                    "detail": "Hasło zostało pomyślnie zmienione.",
+                    "success": True
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response(
+                {"detail": "Link jest nieprawidłowy."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class IsAdmin(IsAdminUser):
@@ -254,7 +386,7 @@ def admin_student_toggle_status(request, pk):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def admin_reservations_list(request):
-    reservations = Reservation.objects.all().order_by('-booked_at')  # <-- tutaj zmiana
+    reservations = Reservation.objects.all().order_by('-booked_at')
     serializer = ReservationSerializer(reservations, many=True)
     return Response(serializer.data)
 

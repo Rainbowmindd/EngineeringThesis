@@ -23,12 +23,12 @@ Witaj {reservation.slot.lecturer.get_full_name()},
 Student {reservation.student.get_full_name()} ({reservation.student.email}) 
 zarezerwował termin konsultacji:
 
-Data: {reservation.slot.start_time.strftime('%Y-%m-%d')}
-Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
-Lokalizacja: {reservation.slot.meeting_location}
-Temat: {reservation.topic or 'Brak tematu'}
+📅 Data: {reservation.slot.start_time.strftime('%Y-%m-%d')}
+🕐 Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
+📍 Lokalizacja: {reservation.slot.meeting_location}
+📝 Temat: {reservation.topic or 'Brak tematu'}
 
- Rezerwacja oczekuje na Twoją akceptację.
+⚠️ Rezerwacja oczekuje na Twoją akceptację.
 
 Zaloguj się do systemu, aby zaakceptować lub odrzucić rezerwację:
 {settings.FRONTEND_URL}/lecturer-reservations
@@ -151,7 +151,7 @@ System Rezerwacji Konsultacji
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>Nowa Rezerwacja Oczekuje</h1>
+            <h1>📋 Nowa Rezerwacja Oczekuje</h1>
         </div>
 
         <div class="content">
@@ -163,12 +163,12 @@ System Rezerwacji Konsultacji
 
             <div class="student-info">
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">👤</span>
                     <span class="info-label">Student:</span>
                     <span class="info-value">{reservation.student.get_full_name()}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">✉️</span>
                     <span class="info-label">Email:</span>
                     <span class="info-value">{reservation.student.email}</span>
                 </div>
@@ -176,29 +176,29 @@ System Rezerwacji Konsultacji
 
             <div class="info-card">
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">📅</span>
                     <span class="info-label">Data:</span>
                     <span class="info-value">{reservation.slot.start_time.strftime('%d.%m.%Y (%A)')}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">🕐</span>
                     <span class="info-label">Godzina:</span>
                     <span class="info-value">{reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">📍</span>
                     <span class="info-label">Lokalizacja:</span>
                     <span class="info-value">{reservation.slot.meeting_location}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">📝</span>
                     <span class="info-label">Temat:</span>
                     <span class="info-value">{reservation.topic or 'Nie podano'}</span>
                 </div>
             </div>
 
             <div class="alert-box">
-                <p> Rezerwacja oczekuje na Twoją akceptację</p>
+                <p>⚠️ Rezerwacja oczekuje na Twoją akceptację</p>
             </div>
 
             <center>
@@ -219,7 +219,7 @@ System Rezerwacji Konsultacji
 
         # Wyślij email z HTML
         msg = EmailMultiAlternatives(
-            subject="Nowa rezerwacja oczekuje na potwierdzenie",
+            subject="📅 Nowa rezerwacja oczekuje na potwierdzenie",
             body=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[reservation.slot.lecturer.email]
@@ -264,13 +264,13 @@ Witaj {reservation.student.get_full_name()},
 
 Twoja rezerwacja została utworzona i oczekuje na potwierdzenie przez prowadzącego.
 
-Data: {reservation.slot.start_time.strftime('%Y-%m-%d')}
-Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
-Prowadzący: {reservation.slot.lecturer.get_full_name()}
-Lokalizacja: {reservation.slot.meeting_location}
-Temat: {reservation.topic or 'Brak tematu'}
+📅 Data: {reservation.slot.start_time.strftime('%Y-%m-%d')}
+🕐 Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
+👤 Prowadzący: {reservation.slot.lecturer.get_full_name()}
+📍 Lokalizacja: {reservation.slot.meeting_location}
+📝 Temat: {reservation.topic or 'Brak tematu'}
 
- Status: OCZEKUJE NA POTWIERDZENIE
+⏳ Status: OCZEKUJE NA POTWIERDZENIE
 
 Otrzymasz powiadomienie, gdy prowadzący zaakceptuje lub odrzuci Twoją rezerwację.
 
@@ -384,7 +384,7 @@ System Rezerwacji Konsultacji
 <body>
     <div class="email-container">
         <div class="header">
-            <h1> Rezerwacja Utworzona</h1>
+            <h1>📝 Rezerwacja Utworzona</h1>
         </div>
 
         <div class="content">
@@ -400,22 +400,22 @@ System Rezerwacji Konsultacji
 
             <div class="info-card">
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">📅</span>
                     <span class="info-label">Data:</span>
                     <span class="info-value">{reservation.slot.start_time.strftime('%d.%m.%Y (%A)')}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">🕐</span>
                     <span class="info-label">Godzina:</span>
                     <span class="info-value">{reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">👤</span>
                     <span class="info-label">Prowadzący:</span>
                     <span class="info-value">{reservation.slot.lecturer.get_full_name()}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">📍</span>
                     <span class="info-label">Lokalizacja:</span>
                     <span class="info-value">{reservation.slot.meeting_location}</span>
                 </div>
@@ -423,7 +423,7 @@ System Rezerwacji Konsultacji
             </div>
 
             <div class="status-pending">
-                <p> Status: OCZEKUJE NA POTWIERDZENIE</p>
+                <p>⏳ Status: OCZEKUJE NA POTWIERDZENIE</p>
             </div>
 
             <p style="text-align: center; color: #666;">
@@ -447,7 +447,7 @@ System Rezerwacji Konsultacji
         """
 
         msg = EmailMultiAlternatives(
-            subject=" Rezerwacja utworzona - oczekuje na potwierdzenie",
+            subject="📝 Rezerwacja utworzona - oczekuje na potwierdzenie",
             body=text_content,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[reservation.student.email]
@@ -490,12 +490,12 @@ Witaj {reservation.student.get_full_name()},
 
 Świetne wiadomości! Twoja rezerwacja została zaakceptowana przez prowadzącego.
 
-Data: {reservation.slot.start_time.strftime('%d.%m.%Y')}
-Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
-Prowadzący: {reservation.slot.lecturer.get_full_name()}
-Lokalizacja: {reservation.slot.meeting_location}
+📅 Data: {reservation.slot.start_time.strftime('%d.%m.%Y')}
+🕐 Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
+👤 Prowadzący: {reservation.slot.lecturer.get_full_name()}
+📍 Lokalizacja: {reservation.slot.meeting_location}
 
-Status: POTWIERDZONA
+✅ Status: POTWIERDZONA
 
 Pamiętaj o punktualnym przybyciu na konsultacje!
 
@@ -602,11 +602,11 @@ System Rezerwacji Konsultacji
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>Rezerwacja Zaakceptowana!</h1>
+            <h1>✅ Rezerwacja Zaakceptowana!</h1>
         </div>
 
         <div class="content">
-            <div class="success-icon"></div>
+            <div class="success-icon">🎉</div>
 
             <p style="text-align: center; font-size: 18px; color: #333;">
                 Witaj <strong>{reservation.student.get_full_name()}</strong>!
@@ -618,17 +618,17 @@ System Rezerwacji Konsultacji
 
             <div class="info-card">
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">📅</span>
                     <span class="info-label">Data:</span>
                     <span class="info-value">{reservation.slot.start_time.strftime('%d.%m.%Y (%A)')}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">🕐</span>
                     <span class="info-label">Godzina:</span>
                     <span class="info-value">{reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-icon"></span>
+                    <span class="info-icon">👤</span>
                     <span class="info-label">Prowadzący:</span>
                     <span class="info-value">{reservation.slot.lecturer.get_full_name()}</span>
                 </div>
@@ -640,12 +640,12 @@ System Rezerwacji Konsultacji
             </div>
 
             <div class="status-accepted">
-                <p> STATUS: POTWIERDZONA</p>
+                <p>✅ STATUS: POTWIERDZONA</p>
             </div>
 
             <div class="reminder-box">
                 <p style="margin: 0; color: #F57F17;">
-                     <strong>Pamiętaj:</strong> Przybądź punktualnie na konsultacje!
+                    ⏰ <strong>Pamiętaj:</strong> Przybądź punktualnie na konsultacje!
                 </p>
             </div>
         </div>
@@ -658,7 +658,7 @@ System Rezerwacji Konsultacji
 </body>
 </html>
             """
-            subject = "Rezerwacja zaakceptowana!"
+            subject = "✅ Rezerwacja zaakceptowana!"
 
         elif reservation.status == 'rejected':
             reason = reservation.rejection_reason or "Brak podanego powodu"
@@ -667,12 +667,12 @@ Witaj {reservation.student.get_full_name()},
 
 Niestety, Twoja rezerwacja została odrzucona przez prowadzącego.
 
-Data: {reservation.slot.start_time.strftime('%d.%m.%Y')}
-Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
-Prowadzący: {reservation.slot.lecturer.get_full_name()}
+📅 Data: {reservation.slot.start_time.strftime('%d.%m.%Y')}
+🕐 Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
+👤 Prowadzący: {reservation.slot.lecturer.get_full_name()}
 
-Status: ODRZUCONA
-Powód: {reason}
+❌ Status: ODRZUCONA
+📝 Powód: {reason}
 
 Możesz spróbować zarezerwować inny termin w systemie:
 {settings.FRONTEND_URL}/student-reservations
@@ -776,7 +776,7 @@ System Rezerwacji Konsultacji
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>Rezerwacja Odrzucona</h1>
+            <h1>❌ Rezerwacja Odrzucona</h1>
         </div>
 
         <div class="content">
@@ -910,15 +910,15 @@ def notify_lecturer_cancellation(reservation_id):
             'slot', 'slot__lecturer', 'student'
         ).get(id=reservation_id)
 
-        subject = f"Student anulował rezerwację"
+        subject = f"🚫 Student anulował rezerwację"
         message = f"""
 Witaj {reservation.slot.lecturer.get_full_name()},
 
 Student {reservation.student.get_full_name()} anulował swoją rezerwację:
 
-Data: {reservation.slot.start_time.strftime('%Y-%m-%d')}
-Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
-Lokalizacja: {reservation.slot.meeting_location}
+📅 Data: {reservation.slot.start_time.strftime('%Y-%m-%d')}
+🕐 Godzina: {reservation.slot.start_time.strftime('%H:%M')} - {reservation.slot.end_time.strftime('%H:%M')}
+📍 Lokalizacja: {reservation.slot.meeting_location}
 
 Miejsce zostało zwolnione dla innych studentów.
 
@@ -939,4 +939,199 @@ System Rezerwacji Konsultacji
 
     except Exception as e:
         print(f"Błąd wysyłki emaila: {e}")
+        return False
+
+
+# Dodaj na KONIEC pliku apps/reservations/tasks.py:
+
+from .sms_utils import send_sms, format_phone_number
+
+
+@shared_task
+def send_sms_lecturer_new_reservation(reservation_id):
+    """
+    SMS dla prowadzącego o nowej rezerwacji
+    """
+    from .models import Reservation
+
+    try:
+        reservation = Reservation.objects.select_related(
+            'slot', 'slot__lecturer', 'student'
+        ).get(id=reservation_id)
+
+        # Sprawdź czy prowadzący ma numer telefonu
+        lecturer = reservation.slot.lecturer
+        if not hasattr(lecturer, 'phone') or not lecturer.phone:
+            print(f"Prowadzący {lecturer.email} nie ma numeru telefonu - pomijam SMS")
+            return False
+
+        phone = format_phone_number(lecturer.phone)
+        if not phone:
+            print(f"Nieprawidłowy numer telefonu prowadzącego: {lecturer.phone}")
+            return False
+
+        # Treść SMS (max 160 znaków)
+        message = (
+            f"Nowa rezerwacja od {reservation.student.get_full_name()}\n"
+            f"Data: {reservation.slot.start_time.strftime('%d.%m %H:%M')}\n"
+            f"Zaloguj się aby zaakceptować."
+        )
+
+        success = send_sms(phone, message)
+
+        if success:
+            print(f"SMS wysłany do prowadzącego: {lecturer.email} ({phone})")
+        else:
+            print(f"Błąd wysyłki SMS do prowadzącego: {lecturer.email}")
+
+        return success
+
+    except Exception as e:
+        print(f"Błąd w send_sms_lecturer_new_reservation: {e}")
+        return False
+
+
+@shared_task
+def send_sms_student_reservation_confirmed(reservation_id):
+    """
+    SMS dla studenta o potwierdzeniu rezerwacji
+    """
+    from .models import Reservation
+
+    try:
+        reservation = Reservation.objects.select_related(
+            'slot', 'slot__lecturer', 'student'
+        ).get(id=reservation_id)
+
+        # Sprawdź czy student ma numer telefonu
+        student = reservation.student
+        if not hasattr(student, 'phone') or not student.phone:
+            print(f"Student {student.email} nie ma numeru telefonu - pomijam SMS")
+            return False
+
+        phone = format_phone_number(student.phone)
+        if not phone:
+            print(f"Nieprawidłowy numer telefonu studenta: {student.phone}")
+            return False
+
+        # Treść SMS
+        message = (
+            f"Rezerwacja utworzona!\n"
+            f"Prowadzący: {reservation.slot.lecturer.get_full_name()}\n"
+            f"Data: {reservation.slot.start_time.strftime('%d.%m %H:%M')}\n"
+            f"Oczekuje na potwierdzenie."
+        )
+
+        success = send_sms(phone, message)
+
+        if success:
+            print(f"SMS potwierdzenia wysłany do studenta: {student.email} ({phone})")
+        else:
+            print(f"Błąd wysyłki SMS do studenta: {student.email}")
+
+        return success
+
+    except Exception as e:
+        print(f"Błąd w send_sms_student_reservation_confirmed: {e}")
+        return False
+
+
+@shared_task
+def send_sms_student_status_change(reservation_id):
+    """
+    SMS dla studenta o zmianie statusu (accepted/rejected)
+    """
+    from .models import Reservation
+
+    try:
+        reservation = Reservation.objects.select_related(
+            'slot', 'slot__lecturer', 'student'
+        ).get(id=reservation_id)
+
+        # Sprawdź czy student ma numer telefonu
+        student = reservation.student
+        if not hasattr(student, 'phone') or not student.phone:
+            print(f"Student {student.email} nie ma numeru telefonu - pomijam SMS")
+            return False
+
+        phone = format_phone_number(student.phone)
+        if not phone:
+            print(f"Nieprawidłowy numer telefonu studenta: {student.phone}")
+            return False
+
+        # Treść SMS w zależności od statusu
+        if reservation.status == 'accepted':
+            message = (
+                f"Rezerwacja ZAAKCEPTOWANA!\n"
+                f"Data: {reservation.slot.start_time.strftime('%d.%m %H:%M')}\n"
+                f"Lokalizacja: {reservation.slot.meeting_location}"
+            )
+        elif reservation.status == 'rejected':
+            reason = reservation.rejection_reason or "Brak powodu"
+            message = (
+                f"Rezerwacja ODRZUCONA.\n"
+                f"Powód: {reason[:50]}...\n"  # Ogranicz do 50 znaków
+                f"Spróbuj zarezerwować inny termin."
+            )
+        else:
+            return False
+
+        success = send_sms(phone, message)
+
+        if success:
+            print(f"SMS zmiany statusu wysłany do studenta: {student.email} ({phone})")
+        else:
+            print(f"Błąd wysyłki SMS do studenta: {student.email}")
+
+        return success
+
+    except Exception as e:
+        print(f"Błąd w send_sms_student_status_change: {e}")
+        return False
+
+
+@shared_task
+def send_sms_reminder_before_consultation(reservation_id, hours_before=2):
+    """
+    Przypomnienie SMS przed konsultacją (np. 2h wcześniej)
+    """
+    from .models import Reservation
+
+    try:
+        reservation = Reservation.objects.select_related(
+            'slot', 'slot__lecturer', 'student'
+        ).get(id=reservation_id)
+
+        # Tylko dla zaakceptowanych rezerwacji
+        if reservation.status != 'accepted':
+            return False
+
+        # Sprawdź czy student ma numer telefonu
+        student = reservation.student
+        if not hasattr(student, 'phone') or not student.phone:
+            return False
+
+        phone = format_phone_number(student.phone)
+        if not phone:
+            return False
+
+        # Treść SMS przypomnienia
+        message = (
+            f"PRZYPOMNIENIE: Konsultacje za {hours_before}h!\n"
+            f"Prowadzący: {reservation.slot.lecturer.get_full_name()}\n"
+            f"Godz: {reservation.slot.start_time.strftime('%H:%M')}\n"
+            f"Miejsce: {reservation.slot.meeting_location}"
+        )
+
+        success = send_sms(phone, message)
+
+        if success:
+            print(f"SMS przypomnienia wysłany do studenta: {student.email} ({phone})")
+        else:
+            print(f"Błąd wysyłki SMS przypomnienia do studenta: {student.email}")
+
+        return success
+
+    except Exception as e:
+        print(f"Błąd w send_sms_reminder_before_consultation: {e}")
         return False
