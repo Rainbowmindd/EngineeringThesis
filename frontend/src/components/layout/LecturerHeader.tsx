@@ -62,12 +62,12 @@ const LecturerHeader: React.FC = () => {
     Mój harmonogram
   </Link>
 
-  {/*<Link*/}
-  {/*  to="/lecturer/reservations" // lub /lecturer-students*/}
-  {/*  className="text-gray-600 hover:text-green-600 transition-colors font-medium"*/}
-  {/*>*/}
-  {/*  Moje konsultacje*/}
-  {/*</Link>*/}
+  <Link
+    to="/lecturer-reservations" // lub /lecturer-students
+    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+  >
+    Zarządzaj konsultacjami
+  </Link>
 
   <a
     href="https://web.usos.agh.edu.pl/kontroler.php?_action=news/default"
@@ -78,12 +78,6 @@ const LecturerHeader: React.FC = () => {
     Plan zajęć
   </a>
 
-  <Link
-    to="/help"
-    className="text-gray-600 hover:text-green-600 transition-colors font-medium"
-  >
-    Pomoc
-  </Link>
 </nav>
 
 

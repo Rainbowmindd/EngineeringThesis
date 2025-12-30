@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Check, X, Clock3, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Check,
+  X,
+  Clock3,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  FileText,
+  Upload,
+  Download
+} from 'lucide-react';
 import { lecturerReservationsAPI } from '@/api/schedule';
 import type { LecturerReservation, ReservationStatistics } from '@/api/types';
+import LecturerHeader from "@/components/layout/LecturerHeader.tsx";
 
 const LecturerReservationsPage: React.FC = () => {
   const [reservations, setReservations] = useState<LecturerReservation[]>([]);
@@ -9,11 +23,15 @@ const LecturerReservationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'accepted' | 'completed' | 'rejected'>('pending');
+
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  // Fetch reservations
+  const [notesModalOpen, setNotesModalOpen] = useState(false);
+  const [lecturerNotes, setLecturerNotes] = useState('');
+  const [lecturerFile, setLecturerFile] = useState<File | null>(null);
+
   const fetchReservations = async () => {
     try {
       setLoading(true);
@@ -28,7 +46,6 @@ const LecturerReservationsPage: React.FC = () => {
     }
   };
 
-  // Fetch statistics
   const fetchStatistics = async () => {
     try {
       const response = await lecturerReservationsAPI.getStatistics();
@@ -58,7 +75,6 @@ const LecturerReservationsPage: React.FC = () => {
     }
   };
 
-  // Reject reservation
   const handleReject = async (id: number) => {
     setSelectedReservationId(id);
     setRejectModalOpen(true);
@@ -81,13 +97,67 @@ const LecturerReservationsPage: React.FC = () => {
     }
   };
 
-  // Filter reservations by status
+  const openNotesModal = (id: number) => {
+    const reservation = reservations.find(r => r.id === id);
+    if (reservation) {
+      setSelectedReservationId(id);
+      setLecturerNotes(reservation.lecturer_notes || '');
+      setNotesModalOpen(true);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validTypes = [
+        'application/pdf',
+        'text/plain',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ];
+      const maxSize = 5 * 1024 * 1024;
+
+      if (!validTypes.includes(file.type)) {
+        alert('Nieprawidłowy typ pliku. Dozwolone: PDF, TXT, DOCX');
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert('Plik jest za duży. Maksymalny rozmiar: 5MB');
+        return;
+      }
+
+      setLecturerFile(file);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedReservationId) return;
+
+    try {
+      setLoading(true);
+      await lecturerReservationsAPI.addNotes(selectedReservationId, {
+        lecturer_notes: lecturerNotes,
+        lecturer_attachment: lecturerFile || undefined,
+      });
+      alert('Notatki zostały zapisane!');
+      setNotesModalOpen(false);
+      setLecturerNotes('');
+      setLecturerFile(null);
+      setSelectedReservationId(null);
+      fetchReservations();
+    } catch (err: any) {
+      console.error('Error saving notes:', err);
+      alert(err.response?.data?.detail || 'Błąd przy zapisywaniu notatek');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const pendingReservations = reservations.filter(r => r.status === 'pending');
   const acceptedReservations = reservations.filter(r => r.status === 'accepted');
   const completedReservations = reservations.filter(r => r.status === 'completed');
   const rejectedReservations = reservations.filter(r => r.status === 'rejected');
 
-  // Format date and time
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pl-PL', {
@@ -112,7 +182,6 @@ const LecturerReservationsPage: React.FC = () => {
     return Math.round(durationMs / (1000 * 60)); // minutes
   };
 
-  // Reservation Card Component
   const ReservationCard: React.FC<{ reservation: LecturerReservation; showActions?: boolean }> = ({
     reservation,
     showActions = false
@@ -183,8 +252,78 @@ const LecturerReservationsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Topic/Notes */}
-          {reservation.topic && (
+          {/* Student Notes */}
+          {reservation.student_notes && (
+            <div className="bg-gray-50 rounded-lg p-3">
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Notatki studenta: </span>
+                {reservation.student_notes}
+              </p>
+            </div>
+          )}
+
+          {/* Student Attachment */}
+          {reservation.student_attachment_url && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Załącznik studenta</p>
+                    <p className="text-xs text-gray-600">
+                      {reservation.student_attachment?.split('/').pop() || 'Plik'}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={reservation.student_attachment_url}
+                  download
+                  className="px-3 py-1 text-sm border border-blue-600 text-blue-600 rounded hover:bg-blue-50 flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Pobierz
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Lecturer Notes */}
+          {reservation.lecturer_notes && (
+            <div className="bg-green-50 rounded-lg p-3">
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Twoje notatki: </span>
+                {reservation.lecturer_notes}
+              </p>
+            </div>
+          )}
+
+          {/* Lecturer Attachment */}
+          {reservation.lecturer_attachment_url && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Twój załącznik</p>
+                    <p className="text-xs text-gray-600">
+                      {reservation.lecturer_attachment?.split('/').pop() || 'Plik'}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={reservation.lecturer_attachment_url}
+                  download
+                  className="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-50 flex items-center"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Pobierz
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Topic */}
+          {reservation.topic && !reservation.student_notes && (
             <div className="bg-gray-50 rounded-lg p-3">
               <p className="text-sm text-gray-700">
                 <span className="font-medium">Temat: </span>
@@ -209,6 +348,7 @@ const LecturerReservationsPage: React.FC = () => {
               <button
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center justify-center"
                 onClick={() => handleApprove(reservation.id)}
+                disabled={loading}
               >
                 <Check className="h-4 w-4 mr-2" />
                 Akceptuj
@@ -216,11 +356,24 @@ const LecturerReservationsPage: React.FC = () => {
               <button
                 className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center justify-center"
                 onClick={() => handleReject(reservation.id)}
+                disabled={loading}
               >
                 <X className="h-4 w-4 mr-2" />
                 Odrzuć
               </button>
             </div>
+          )}
+
+          {/* Add/Edit Lecturer Notes */}
+          {(reservation.status === 'accepted' || reservation.status === 'completed') && (
+            <button
+              className="w-full px-4 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 font-medium flex items-center justify-center"
+              onClick={() => openNotesModal(reservation.id)}
+              disabled={loading}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              {reservation.lecturer_notes ? 'Edytuj notatki' : 'Dodaj notatki po spotkaniu'}
+            </button>
           )}
         </div>
       </div>
@@ -249,7 +402,7 @@ const LecturerReservationsPage: React.FC = () => {
     </div>
   );
 
-  if (loading) {
+  if (loading && reservations.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
         <div className="text-center">
@@ -263,30 +416,7 @@ const LecturerReservationsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-bold cursor-pointer">
-              K
-            </div>
-            <span className="text-xl font-bold text-gray-900">Zarządzanie Rezerwacjami</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <a href="/lecturer" className="text-gray-600 hover:text-gray-900 transition-colors">
-              Moje sloty
-            </a>
-            <a href="/lecturer/calendar" className="text-gray-600 hover:text-gray-900 transition-colors">
-              Kalendarz
-            </a>
-            <a href="/lecturer/reservations" className="text-green-600 font-medium">
-              Rezerwacje
-            </a>
-          </nav>
-          <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            Wyloguj
-          </button>
-        </div>
-      </header>
+      <LecturerHeader />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Welcome Section */}
@@ -462,9 +592,10 @@ const LecturerReservationsPage: React.FC = () => {
             <div className="flex gap-2">
               <button
                 onClick={confirmReject}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition"
+                disabled={loading}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
               >
-                Potwierdź odrzucenie
+                {loading ? 'Odrzucam...' : 'Potwierdź odrzucenie'}
               </button>
               <button
                 onClick={() => {
@@ -472,9 +603,98 @@ const LecturerReservationsPage: React.FC = () => {
                   setRejectionReason('');
                   setSelectedReservationId(null);
                 }}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-medium transition"
+                disabled={loading}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
               >
                 Anuluj
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notes Modal */}
+      {notesModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2">Notatki po konsultacji</h3>
+            <p className="text-sm text-gray-600 mb-4">Dodaj swoje notatki i załączniki z przeprowadzonej konsultacji</p>
+
+            <div className="space-y-4 mb-6">
+              {/* Notes Textarea */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Notatki</label>
+                <textarea
+                  value={lecturerNotes}
+                  onChange={(e) => setLecturerNotes(e.target.value)}
+                  placeholder="Podsumuj przebieg konsultacji, omówione zagadnienia..."
+                  className="w-full border border-gray-300 rounded-lg p-3 min-h-[120px] focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Załącznik (opcjonalnie)
+                  <span className="text-xs text-gray-500 ml-2">PDF, TXT, DOCX - max 5MB</span>
+                </label>
+
+                {lecturerFile ? (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{lecturerFile.name}</p>
+                        <p className="text-xs text-gray-600">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setLecturerFile(null)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <label className="cursor-pointer">
+                      <span className="text-sm text-green-600 font-medium hover:text-green-700">
+                        Kliknij, aby wybrać plik
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.txt,.docx"
+                        onChange={handleFileUpload}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">Materiały, rozwiązania, dodatkowe notatki</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setNotesModalOpen(false);
+                  setLecturerNotes('');
+                  setLecturerFile(null);
+                  setSelectedReservationId(null);
+                }}
+                disabled={loading}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
+              >
+                Anuluj
+              </button>
+              <button
+                onClick={handleSaveNotes}
+                disabled={loading}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
+              >
+                {loading ? 'Zapisuję...' : 'Zapisz notatki'}
               </button>
             </div>
           </div>

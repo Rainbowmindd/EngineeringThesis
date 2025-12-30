@@ -61,6 +61,14 @@ export interface ScheduleUploadResponse {
   errors?: string[];
 }
 
+// ============= ATTACHMENT TYPES =============
+
+export interface AttachmentInfo {
+  name: string;
+  size: number;
+  url: string;
+}
+
 // ============= RESERVATION TYPES =============
 
 // Student Reservation (basic)
@@ -70,6 +78,14 @@ export interface Reservation {
   status: "Confirmed" | "Pending" | "Completed";
   student_name?: string;
   subject?: string;
+  // NOWE POLA:
+  student_notes?: string;
+  student_attachment?: string;  // URL do pliku
+  student_attachment_url?: string;
+  lecturer_notes?: string;
+  lecturer_attachment?: string;  // URL do pliku
+  lecturer_attachment_url?: string;
+  rejection_reason?: string;
 }
 
 // UI only
@@ -106,6 +122,14 @@ export interface LecturerReservation {
   student_name: string;
   student_email: string;
   topic: string;
+  // NOWE POLA:
+  student_notes?: string;
+  student_attachment?: string;  // URL do pliku
+  student_attachment_url?: string;
+  lecturer_notes?: string;
+  lecturer_attachment?: string;  // URL do pliku
+  lecturer_attachment_url?: string;
+  // ISTNIEJĄCE:
   status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'completed' | 'no_show_student' | 'no_show_lecturer';
   status_display: string;
   rejection_reason: string | null;
@@ -124,4 +148,24 @@ export interface ReservationStatistics {
   completed: number;
   no_show_student: number;
   no_show_lecturer: number;
+}
+
+// ============= CREATE/UPDATE TYPES =============
+
+export interface CreateReservationData {
+  slot_id: number;
+  topic?: string;
+  student_notes?: string;
+  student_attachment?: File;
+}
+
+export interface UpdateReservationData {
+  topic?: string;
+  student_notes?: string;
+  student_attachment?: File;
+}
+
+export interface AddLecturerNotesData {
+  lecturer_notes?: string;
+  lecturer_attachment?: File;
 }

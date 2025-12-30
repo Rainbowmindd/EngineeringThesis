@@ -4,9 +4,23 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.db import transaction
 from django.utils import timezone
+import os
 
 # Importy z Twoich aplikacji
 from apps.schedules.models import AvailableSlot
+
+
+def student_attachment_path(instance, filename):
+    """Ścieżka zapisu załącznika studenta"""
+    # Usuń niebezpieczne znaki z nazwy pliku
+    filename = os.path.basename(filename)
+    return f'reservations/student/{instance.student.id}/{instance.id}/{filename}'
+
+
+def lecturer_attachment_path(instance, filename):
+    """Ścieżka zapisu załącznika prowadzącego"""
+    filename = os.path.basename(filename)
+    return f'reservations/lecturer/{instance.slot.lecturer.id}/{instance.id}/{filename}'
 
 
 class Reservation(models.Model):
@@ -39,6 +53,7 @@ class Reservation(models.Model):
         blank=True,
         null=True
     )
+
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -51,6 +66,44 @@ class Reservation(models.Model):
         null=True,
         verbose_name="Powód odrzucenia rezerwacji"
     )
+
+    # ============= NOWE POLA - ZAŁĄCZNIKI I NOTATKI =============
+
+    # Notatki studenta
+    student_notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Notatki studenta",
+        help_text="Dodatkowe informacje od studenta o temacie konsultacji"
+    )
+
+    # Załącznik studenta
+    student_attachment = models.FileField(
+        upload_to=student_attachment_path,
+        blank=True,
+        null=True,
+        verbose_name="Załącznik studenta",
+        help_text="PDF, TXT, DOCX - max 5MB"
+    )
+
+    # Notatki prowadzącego
+    lecturer_notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Notatki prowadzącego",
+        help_text="Notatki prowadzącego po przeprowadzonej konsultacji"
+    )
+
+    # Załącznik prowadzącego
+    lecturer_attachment = models.FileField(
+        upload_to=lecturer_attachment_path,
+        blank=True,
+        null=True,
+        verbose_name="Załącznik prowadzącego",
+        help_text="Materiały dodatkowe od prowadzącego (PDF, TXT, DOCX)"
+    )
+
+    # ============================================================
 
     accepted_at = models.DateTimeField(
         blank=True,
@@ -116,6 +169,14 @@ class Reservation(models.Model):
     def is_active(self):
         """Sprawdza czy rezerwacja jest aktywna"""
         return self.status in ['pending', 'accepted']
+
+    def delete(self, *args, **kwargs):
+        """Usuń pliki przy usuwaniu rezerwacji"""
+        if self.student_attachment:
+            self.student_attachment.delete(save=False)
+        if self.lecturer_attachment:
+            self.lecturer_attachment.delete(save=False)
+        super().delete(*args, **kwargs)
 
 
 # ============= SIGNALS =============

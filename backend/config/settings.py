@@ -521,3 +521,17 @@ EMAIL_USE_TLS=True
 # }
 # GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="dummy-client-id")
 # GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="dummy-client-secret")
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Maksymalny rozmiar pliku (5MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB w bajtach
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB w bajtach
+
+# Dozwolone typy MIME dla załączników
+ALLOWED_ATTACHMENT_TYPES = [
+    'application/pdf',
+    'text/plain',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  # DOCX
+]

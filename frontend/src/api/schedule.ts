@@ -7,7 +7,10 @@ import {
   type ScheduleItemCreate,
   type ScheduleUploadResponse,
   type LecturerReservation,
-  type ReservationStatistics
+  type ReservationStatistics,
+  type CreateReservationData,
+  type UpdateReservationData,
+  type AddLecturerNotesData
 } from "./types"
 
 const BASE_URL = "/api/schedules";
@@ -113,16 +116,56 @@ export const exportScheduleCSV = async () => {
 // ============= STUDENT RESERVATIONS API =============
 
 export const reservationsAPI = {
-  // Rezerwacja slotu
-  reserveSlot: (slotId: number, topic?: string) =>
-    api.post("/api/reservations/student/", {
-      slot_id: slotId,
-      topic: topic ?? "",
-    }),
+  // Rezerwacja slotu Z ZAŁĄCZNIKIEM
+  reserveSlot: (data: CreateReservationData) => {
+    const formData = new FormData();
+    formData.append('slot_id', data.slot_id.toString());
+
+    if (data.topic) {
+      formData.append('topic', data.topic);
+    }
+
+    if (data.student_notes) {
+      formData.append('student_notes', data.student_notes);
+    }
+
+    if (data.student_attachment) {
+      formData.append('student_attachment', data.student_attachment);
+    }
+
+    return api.post<Reservation>("/api/reservations/student/", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // Lista swoich rezerwacji
   getMyReservations: () =>
     api.get<Reservation[]>("/api/reservations/student/"),
+
+  // Edycja rezerwacji (przed akceptacją)
+  updateReservation: (reservationId: number, data: UpdateReservationData) => {
+    const formData = new FormData();
+
+    if (data.topic !== undefined) {
+      formData.append('topic', data.topic);
+    }
+
+    if (data.student_notes !== undefined) {
+      formData.append('student_notes', data.student_notes);
+    }
+
+    if (data.student_attachment) {
+      formData.append('student_attachment', data.student_attachment);
+    }
+
+    return api.patch<Reservation>(`/api/reservations/student/${reservationId}/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // Anulowanie rezerwacji
   cancelReservation: (reservationId: number) =>
@@ -151,6 +194,29 @@ export const lecturerReservationsAPI = {
     api.post(`/api/reservations/lecturer/${reservationId}/reject/`, {
       reason: reason || "Brak podanego powodu"
     }),
+
+  // Dodanie notatek prowadzącego Z ZAŁĄCZNIKIEM
+  addNotes: (reservationId: number, data: AddLecturerNotesData) => {
+    const formData = new FormData();
+
+    if (data.lecturer_notes) {
+      formData.append('lecturer_notes', data.lecturer_notes);
+    }
+
+    if (data.lecturer_attachment) {
+      formData.append('lecturer_attachment', data.lecturer_attachment);
+    }
+
+    return api.post<LecturerReservation>(
+      `/api/reservations/lecturer/${reservationId}/add_notes/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  },
 
   // Zmiana statusu (completed, no-show, etc.)
   updateStatus: (reservationId: number, status: string) =>

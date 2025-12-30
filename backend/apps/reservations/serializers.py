@@ -22,7 +22,7 @@ class SlotDetailsSerializer(serializers.ModelSerializer):
             'meeting_location',
             'max_attendees',
             'reservations_count',
-            'accepted_reservations_count',  # ← NOWE
+            'accepted_reservations_count',
             'is_active'
         )
         read_only_fields = ('lecturer_details', 'lecturer_email')
@@ -46,6 +46,10 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     slot_id = serializers.IntegerField(write_only=True, required=True)
 
+    # Załączniki - URL do pobierania
+    student_attachment_url = serializers.SerializerMethodField()
+    lecturer_attachment_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Reservation
         fields = (
@@ -56,6 +60,12 @@ class ReservationSerializer(serializers.ModelSerializer):
             'student_name',
             'student_email',
             'topic',
+            'student_notes',  # NOWE
+            'student_attachment',  # NOWE
+            'student_attachment_url',  # NOWE
+            'lecturer_notes',  # NOWE
+            'lecturer_attachment',  # NOWE
+            'lecturer_attachment_url',  # NOWE
             'status',
             'status_display',
             'rejection_reason',
@@ -71,8 +81,43 @@ class ReservationSerializer(serializers.ModelSerializer):
             'updated_at',
             'accepted_at',
             'accepted_by',
-            'rejection_reason'
+            'rejection_reason',
+            'lecturer_notes',  # Student nie może edytować notatek prowadzącego
+            'lecturer_attachment',  # Student nie może edytować załącznika prowadzącego
         )
+
+    def get_student_attachment_url(self, obj):
+        """Zwraca URL do załącznika studenta"""
+        if obj.student_attachment:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.student_attachment.url)
+        return None
+
+    def get_lecturer_attachment_url(self, obj):
+        """Zwraca URL do załącznika prowadzącego"""
+        if obj.lecturer_attachment:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.lecturer_attachment.url)
+        return None
+
+    def validate_student_attachment(self, value):
+        """Walidacja załącznika studenta"""
+        if value:
+            # Sprawdź rozmiar pliku (max 5MB)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Plik jest za duży. Maksymalny rozmiar: 5MB")
+
+            # Sprawdź typ pliku
+            allowed_types = ['application/pdf', 'text/plain',
+                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            if value.content_type not in allowed_types:
+                raise serializers.ValidationError(
+                    "Nieprawidłowy typ pliku. Dozwolone: PDF, TXT, DOCX"
+                )
+
+        return value
 
     def create(self, validated_data):
         print("Creating reservation with data:", validated_data)
@@ -104,7 +149,9 @@ class ReservationSerializer(serializers.ModelSerializer):
             slot=slot,
             student=self.context['request'].user,
             topic=validated_data.get('topic', ''),
-            status='pending'  # ← Zawsze pending na starcie
+            student_notes=validated_data.get('student_notes', ''),
+            student_attachment=validated_data.get('student_attachment', None),
+            status='pending'
         )
 
         print(f"Rezerwacja #{reservation.pk} utworzona ze statusem: pending")
@@ -169,3 +216,34 @@ class RejectReservationSerializer(serializers.Serializer):
         max_length=500,
         help_text="Powód odrzucenia rezerwacji (opcjonalny)"
     )
+
+
+class LecturerNotesSerializer(serializers.Serializer):
+    """Serializer dla dodawania notatek prowadzącego"""
+    lecturer_notes = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        help_text="Notatki prowadzącego po konsultacji"
+    )
+    lecturer_attachment = serializers.FileField(
+        required=False,
+        allow_null=True,
+        help_text="Załącznik prowadzącego (PDF, TXT, DOCX - max 5MB)"
+    )
+
+    def validate_lecturer_attachment(self, value):
+        """Walidacja załącznika prowadzącego"""
+        if value:
+            # Sprawdź rozmiar pliku (max 5MB)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Plik jest za duży. Maksymalny rozmiar: 5MB")
+
+            # Sprawdź typ pliku
+            allowed_types = ['application/pdf', 'text/plain',
+                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            if value.content_type not in allowed_types:
+                raise serializers.ValidationError(
+                    "Nieprawidłowy typ pliku. Dozwolone: PDF, TXT, DOCX"
+                )
+
+        return value

@@ -4,13 +4,12 @@ import { Link } from "react-router-dom"
 import { Button } from "../ui/Button"
 import { Card, CardContent } from "../ui/Card"
 import { Badge } from "../ui/Badge"
-import { Calendar, Clock, MapPin, Users, Search, Filter, AlertCircle } from "lucide-react"
+import { Calendar, Clock, MapPin, Users, Search, Filter, AlertCircle, Upload, FileText, X } from "lucide-react"
 
 import Header from "../layout/Header"
 import Footer from "../layout/Footer"
 
-import { schedulesAPI } from "../../api/schedule"
-import  { reservationsAPI } from "../../api/reservations"
+import { schedulesAPI, reservationsAPI } from "../../api/schedule"
 import type { TimeWindow } from "../../api/types"
 
 export function ReservationsPage() {
@@ -18,6 +17,12 @@ export function ReservationsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedProfessor, setSelectedProfessor] = useState<string>("")
   const [selectedSubject, setSelectedSubject] = useState<string>("")
+
+  // Modal state
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [selectedSlot, setSelectedSlot] = useState<TimeWindow | null>(null)
+  const [bookingNotes, setBookingNotes] = useState("")
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
 
   // =========================
   // LOAD DATA
@@ -50,11 +55,9 @@ export function ReservationsPage() {
   // =========================
   // FILTERS
   // =========================
-  // Unikalne wartości do filtrów
   const professors = [...new Set(availableSlots.map(slot => slot.lecturer_details || "Nieznany wykładowca"))]
   const subjects = [...new Set(availableSlots.map(slot => slot.subject || "Brak tematu").filter(Boolean))]
 
-  // Filtrowanie slotów
   const filteredSlots = availableSlots.filter(slot => {
     if (selectedProfessor && (slot.lecturer_details || "Nieznany wykładowca") !== selectedProfessor) {
       return false
@@ -94,22 +97,68 @@ export function ReservationsPage() {
   }
 
   // =========================
+  // FILE UPLOAD HANDLER
+  // =========================
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const validTypes = [
+        'application/pdf',
+        'text/plain',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ]
+      const maxSize = 5 * 1024 * 1024 // 5MB
+
+      if (!validTypes.includes(file.type)) {
+        alert('Nieprawidłowy typ pliku. Dozwolone: PDF, TXT, DOCX')
+        return
+      }
+
+      if (file.size > maxSize) {
+        alert('Plik jest za duży. Maksymalny rozmiar: 5MB')
+        return
+      }
+
+      setUploadedFile(file)
+    }
+  }
+
+  // =========================
   // RESERVATION HANDLER
   // =========================
-  const handleReservation = async (slotId: number) => {
-  try {
-    await reservationsAPI.reserveSlot(slotId)
-    alert("Rezerwacja potwierdzona ✅")
-    loadSlots()
-  } catch (e: any) {
-    alert(
-      e?.response?.data?.detail ??
-        JSON.stringify(e?.response?.data) ??
-      "Nie udało się zarezerwować slotu"
-    )
+  const openBookingModal = (slot: TimeWindow) => {
+    setSelectedSlot(slot)
+    setIsBookingModalOpen(true)
   }
-}
 
+  const handleBookingConfirm = async () => {
+    if (!selectedSlot) return
+
+    try {
+      setLoading(true)
+      await reservationsAPI.reserveSlot({
+        slot_id: selectedSlot.id,
+        topic: selectedSlot.subject || '',
+        student_notes: bookingNotes,
+        student_attachment: uploadedFile || undefined,
+      })
+
+      alert("Rezerwacja potwierdzona ✅")
+      setIsBookingModalOpen(false)
+      setBookingNotes("")
+      setUploadedFile(null)
+      setSelectedSlot(null)
+      loadSlots()
+    } catch (e: any) {
+      alert(
+        e?.response?.data?.detail ??
+        JSON.stringify(e?.response?.data) ??
+        "Nie udało się zarezerwować slotu"
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // =========================
   // STATS
@@ -120,7 +169,7 @@ export function ReservationsPage() {
     subjects: subjects.length,
   }
 
-  if (loading) {
+  if (loading && availableSlots.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center">
         <div className="text-center">
@@ -356,8 +405,8 @@ export function ReservationsPage() {
                         </div>
 
                         <Button
-                          disabled={status === "full"}
-                          onClick={() => handleReservation(slot.id)}
+                          disabled={status === "full" || loading}
+                          onClick={() => openBookingModal(slot)}
                           className={`w-full ${
                             status === "available"
                               ? "bg-green-600 hover:bg-green-700 text-white"
@@ -377,6 +426,98 @@ export function ReservationsPage() {
       </main>
 
       <Footer />
+
+      {/* Booking Modal */}
+      {isBookingModalOpen && selectedSlot && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Potwierdź rezerwację</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              {selectedSlot.lecturer_details} - {selectedSlot.subject}
+            </p>
+
+            <div className="space-y-4 mb-6">
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notatki (opcjonalnie)
+                </label>
+                <textarea
+                  placeholder="Opisz temat konsultacji lub dodaj pytania..."
+                  value={bookingNotes}
+                  onChange={(e) => setBookingNotes(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent min-h-[100px]"
+                />
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Załącznik (opcjonalnie)
+                  <span className="text-xs text-gray-500 ml-2">PDF, TXT, DOCX - max 5MB</span>
+                </label>
+
+                {uploadedFile ? (
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center space-x-2">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{uploadedFile.name}</p>
+                        <p className="text-xs text-gray-600">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setUploadedFile(null)}
+                      className="text-red-600 hover:text-red-700 p-1"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-500 transition-colors">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <label className="cursor-pointer">
+                      <span className="text-sm text-green-600 font-medium hover:text-green-700">
+                        Kliknij, aby wybrać plik
+                      </span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.txt,.docx"
+                        onChange={handleFileUpload}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">lub przeciągnij i upuść plik tutaj</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setIsBookingModalOpen(false)
+                  setBookingNotes("")
+                  setUploadedFile(null)
+                }}
+                variant="outline"
+                className="flex-1"
+                disabled={loading}
+              >
+                Anuluj
+              </Button>
+              <Button
+                onClick={handleBookingConfirm}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                disabled={loading}
+              >
+                {loading ? "Rezerwuję..." : "Potwierdź rezerwację"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

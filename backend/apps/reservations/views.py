@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils import timezone
 from django.db.models import Q
 
@@ -8,7 +9,8 @@ from .models import Reservation
 from .serializers import (
     ReservationSerializer,
     AcceptReservationSerializer,
-    RejectReservationSerializer
+    RejectReservationSerializer,
+    LecturerNotesSerializer
 )
 from apps.users.permissions import IsLecturer, IsStudent
 
@@ -19,13 +21,15 @@ class StudentReservationViewSet(viewsets.ModelViewSet):
 
     Endpoints:
     - GET /api/reservations/student/ - lista swoich rezerwacji
-    - POST /api/reservations/student/ - nowa rezerwacja (status: pending)
+    - POST /api/reservations/student/ - nowa rezerwacja (status: pending) + załącznik
     - GET /api/reservations/student/{id}/ - szczegóły rezerwacji
+    - PATCH /api/reservations/student/{id}/ - edytuj rezerwację (przed akceptacją)
     - DELETE /api/reservations/student/{id}/ - usuń rezerwację
     - POST /api/reservations/student/{id}/cancel/ - anuluj rezerwację
     """
     serializer_class = ReservationSerializer
     permission_classes = [IsStudent]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # WAŻNE dla upload plików
 
     def get_queryset(self):
         """Student widzi tylko swoje rezerwacje"""
@@ -36,6 +40,27 @@ class StudentReservationViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Automatycznie przypisz studenta przy tworzeniu"""
         serializer.save(student=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        """
+        Edycja rezerwacji przez studenta
+        Można edytować tylko rezerwacje ze statusem 'pending'
+        """
+        reservation = self.get_object()
+
+        # Sprawdź czy można edytować
+        if reservation.status != 'pending':
+            return Response(
+                {"detail": "Można edytować tylko oczekujące rezerwacje."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Edycja
+        serializer = self.get_serializer(reservation, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
@@ -72,15 +97,15 @@ class StudentReservationViewSet(viewsets.ModelViewSet):
         reservation.status = 'cancelled'
         reservation.save()
 
-        # TODO: Wyślij powiadomienie do prowadzącego
-        # from .tasks import notify_lecturer_cancellation
-        # notify_lecturer_cancellation.delay(reservation.pk)
+        # Wyślij powiadomienie do prowadzącego
+        from .tasks import notify_lecturer_cancellation
+        notify_lecturer_cancellation.delay(reservation.pk)
 
         return Response(
             {
                 "status": "success",
                 "message": "Rezerwacja została anulowana.",
-                "reservation": ReservationSerializer(reservation).data
+                "reservation": ReservationSerializer(reservation, context={'request': request}).data
             },
             status=status.HTTP_200_OK
         )
@@ -95,10 +120,13 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
     - GET /api/reservations/lecturer/{id}/ - szczegóły rezerwacji
     - POST /api/reservations/lecturer/{id}/accept/ - zaakceptuj rezerwację
     - POST /api/reservations/lecturer/{id}/reject/ - odrzuć rezerwację
+    - POST /api/reservations/lecturer/{id}/add_notes/ - dodaj notatki po spotkaniu + załącznik
     - POST /api/reservations/lecturer/{id}/update_status/ - zmień status (completed, no-show, etc.)
+    - GET /api/reservations/lecturer/statistics/ - statystyki
     """
     serializer_class = ReservationSerializer
     permission_classes = [IsLecturer]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # WAŻNE dla upload plików
     http_method_names = ['get', 'post', 'head', 'options']  # Tylko GET i POST
 
     def get_queryset(self):
@@ -157,15 +185,11 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
         reservation.accepted_by = request.user
         reservation.save()
 
-        # TODO: Wyślij powiadomienie do studenta
-        # from .tasks import notify_student_accepted
-        # notify_student_accepted.delay(reservation.pk)
-
         return Response(
             {
                 "status": "success",
                 "message": "Rezerwacja została zaakceptowana.",
-                "reservation": ReservationSerializer(reservation).data
+                "reservation": ReservationSerializer(reservation, context={'request': request}).data
             },
             status=status.HTTP_200_OK
         )
@@ -208,15 +232,64 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
         reservation.rejection_reason = reason
         reservation.save()
 
-        # TODO: Wyślij powiadomienie do studenta
-        # from .tasks import notify_student_rejected
-        # notify_student_rejected.delay(reservation.pk)
-
         return Response(
             {
                 "status": "success",
                 "message": "Rezerwacja została odrzucona.",
-                "reservation": ReservationSerializer(reservation).data
+                "reservation": ReservationSerializer(reservation, context={'request': request}).data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=['post'], serializer_class=LecturerNotesSerializer,
+            parser_classes=[MultiPartParser, FormParser])
+    def add_notes(self, request, pk=None):
+        """
+        Dodawanie/edycja notatek prowadzącego po konsultacji
+
+        Body (multipart/form-data):
+        {
+            "lecturer_notes": "Notatki...",
+            "lecturer_attachment": <file>  (opcjonalnie)
+        }
+        """
+        reservation = self.get_object()
+
+        # Sprawdź uprawnienia
+        if reservation.slot.lecturer != request.user:
+            return Response(
+                {"detail": "Nie masz uprawnień do dodawania notatek do tej rezerwacji."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Można dodawać notatki tylko do zaakceptowanych i zakończonych rezerwacji
+        if reservation.status not in ['accepted', 'completed']:
+            return Response(
+                {"detail": "Można dodawać notatki tylko do zaakceptowanych lub zakończonych rezerwacji."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Walidacja danych
+        serializer = LecturerNotesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Zapisz notatki i załącznik
+        if 'lecturer_notes' in serializer.validated_data:
+            reservation.lecturer_notes = serializer.validated_data['lecturer_notes']
+
+        if 'lecturer_attachment' in serializer.validated_data:
+            # Usuń stary załącznik jeśli istnieje
+            if reservation.lecturer_attachment:
+                reservation.lecturer_attachment.delete(save=False)
+            reservation.lecturer_attachment = serializer.validated_data['lecturer_attachment']
+
+        reservation.save()
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Notatki zostały zapisane.",
+                "reservation": ReservationSerializer(reservation, context={'request': request}).data
             },
             status=status.HTTP_200_OK
         )
@@ -271,16 +344,11 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
         reservation.status = new_status
         reservation.save()
 
-        # TODO: Wyślij powiadomienie do studenta (jeśli no-show)
-        # if new_status in ['no_show_student', 'no_show_lecturer']:
-        #     from .tasks import notify_student_no_show
-        #     notify_student_no_show.delay(reservation.pk)
-
         return Response(
             {
                 "status": "success",
                 "message": f"Status rezerwacji zmieniony na: {reservation.get_status_display()}",
-                "reservation": ReservationSerializer(reservation).data
+                "reservation": ReservationSerializer(reservation, context={'request': request}).data
             },
             status=status.HTTP_200_OK
         )
@@ -296,13 +364,13 @@ class LecturerReservationViewSet(viewsets.ModelViewSet):
 
         stats = {
             'total': reservations.count(),
-            'pending': reservations.filter(status='Pending').count(),
-            'accepted': reservations.filter(status='Accepted').count(),
-            'rejected': reservations.filter(status='Rejected').count(),
-            'cancelled': reservations.filter(status='Cancelled').count(),
-            'completed': reservations.filter(status='Completed').count(),
-            'no_show_student': reservations.filter(status='No_show_student').count(),
-            'no_show_lecturer': reservations.filter(status='No_show_lecturer').count(),
+            'pending': reservations.filter(status='pending').count(),
+            'accepted': reservations.filter(status='accepted').count(),
+            'rejected': reservations.filter(status='rejected').count(),
+            'cancelled': reservations.filter(status='cancelled').count(),
+            'completed': reservations.filter(status='completed').count(),
+            'no_show_student': reservations.filter(status='no_show_student').count(),
+            'no_show_lecturer': reservations.filter(status='no_show_lecturer').count(),
         }
 
         return Response(stats, status=status.HTTP_200_OK)
