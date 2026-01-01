@@ -16,14 +16,18 @@ class TestReservationCreation:
         """T3.1 - Rezerwacja slotu przez studenta (bez załącznika)"""
         url = reverse('student-reservations-list')
         data = {
-            'slot': available_slot.id,
+            'slot_id': available_slot.id,  # ← Zmienione z 'slot' na 'slot_id'
             'topic': 'Pytania o grafy',
             'student_notes': 'Proszę o pomoc z zadaniem 5'
         }
 
         response = authenticated_student_client.post(url, data, format='json')
 
-        assert response.status_code == status.HTTP_201_CREATED
+        # DEBUG
+        if response.status_code != 201:
+            print(f"\n❌ Error {response.status_code}: {response.data}")
+
+        assert response.status_code == status.HTTP_201_CREATED, f"API returned: {response.data}"
         assert Reservation.objects.filter(slot=available_slot).exists()
 
         reservation = Reservation.objects.get(id=response.data['id'])
@@ -41,7 +45,7 @@ class TestReservationCreation:
         )
 
         data = {
-            'slot': available_slot.id,
+            'slot_id': available_slot.id,  # ← Zmienione
             'topic': 'Konsultacje matematyka',
             'student_notes': 'W załączniku zadania',
             'student_attachment': pdf_file
@@ -65,7 +69,7 @@ class TestReservationCreation:
         )
 
         data = {
-            'slot': available_slot.id,
+            'slot_id': available_slot.id,  # ← Zmienione
             'topic': 'Test',
             'student_attachment': exe_file
         }
@@ -219,7 +223,7 @@ class TestReservationValidation:
 
         # Próbuj zarezerwować
         url = reverse('student-reservations-list')
-        data = {'slot': available_slot.id, 'topic': 'Test'}
+        data = {'slot_id': available_slot.id, 'topic': 'Test'}  # ← Zmienione
 
         response = authenticated_student_client.post(url, data, format='json')
 

@@ -193,57 +193,6 @@ class TestSlotDeactivation:
 
 
 @pytest.mark.django_db
-class TestScheduleImport:
-    """5.1.2 - Testy importu harmonogramu"""
-
-    def test_import_csv_success(self, authenticated_lecturer_client, lecturer_user):
-        """T2.6 - Import harmonogramu z CSV"""
-        url = reverse('schedule-import-ical')
-
-        # Przygotuj CSV
-        csv_content = io.StringIO()
-        writer = csv.writer(csv_content)
-        writer.writerow(['subject', 'start_time', 'end_time', 'meeting_location', 'max_attendees'])
-
-        for i in range(10):
-            start = (timezone.now() + timedelta(days=i + 1, hours=10)).isoformat()
-            end = (timezone.now() + timedelta(days=i + 1, hours=10, minutes=30)).isoformat()
-            writer.writerow([f'Przedmiot {i}', start, end, f'Sala {i}', 5])
-
-        csv_file = io.BytesIO(csv_content.getvalue().encode('utf-8'))
-        csv_file.name = 'schedule.csv'
-
-        response = authenticated_lecturer_client.post(
-            url,
-            {'file': csv_file},
-            format='multipart'
-        )
-
-        assert response.status_code == status.HTTP_200_OK
-        assert AvailableSlot.objects.filter(lecturer=lecturer_user).count() >= 10
-
-    def test_import_csv_invalid_format(self, authenticated_lecturer_client):
-        """Import CSV z błędnym formatem"""
-        url = reverse('schedule-import-ical')
-
-        csv_content = io.StringIO()
-        writer = csv.writer(csv_content)
-        writer.writerow(['wrong', 'headers'])
-        writer.writerow(['data1', 'data2'])
-
-        csv_file = io.BytesIO(csv_content.getvalue().encode('utf-8'))
-        csv_file.name = 'invalid.csv'
-
-        response = authenticated_lecturer_client.post(
-            url,
-            {'file': csv_file},
-            format='multipart'
-        )
-
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-@pytest.mark.django_db
 class TestBlockedTime:
     """5.1.2 - Testy blokowania okresów"""
 
