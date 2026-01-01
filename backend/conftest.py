@@ -127,10 +127,23 @@ def pending_reservation(db, student_user, available_slot):
 
 
 @pytest.fixture
-def accepted_reservation(db, student_user, available_slot, lecturer_user):
-    """Tworzy zaakceptowaną rezerwację"""
+def accepted_reservation(db, student_user, lecturer_user):
+    """Tworzy zaakceptowaną rezerwację (na INNYM slocie)"""
+    from apps.schedules.models import AvailableSlot
+
+    # Utwórz OSOBNY slot dla accepted reservation
+    accepted_slot = AvailableSlot.objects.create(
+        lecturer=lecturer_user,
+        start_time=timezone.now() + timedelta(days=3),  # Inny dzień niż available_slot
+        end_time=timezone.now() + timedelta(days=3, minutes=30),
+        subject='Matematyka - Accepted',
+        meeting_location='Bud. B, pok. 300',
+        max_attendees=5,
+        is_active=True
+    )
+
     reservation = Reservation.objects.create(
-        slot=available_slot,
+        slot=accepted_slot,
         student=student_user,
         topic='Konsultacje',
         status='accepted',
